@@ -1,0 +1,46 @@
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore environment-specific files
+
+
+# Ignore Composer dependencies
+/vendor/
+
+# Ignore NPM/Yarn dependencies
+/node_modules/
+
+# Ignore Laravel storage directory files
+/storage/*.key
+/storage/*.log
+/storage/app/*
+/storage/framework/*
+/storage/logs/*
+/storage/debugbar/*
+
+# Ignore Mix-manifest file
+mix-manifest.json
+
+# Ignore Homestead/Homestead.yaml file
+Homestead.yaml
+
+# Ignore SQLite database
+*.sqlite
+
+# Ignore IDE-specific files
+*.idea/
+*.iml
+.project
+*.sublime-project
+*.sublime-workspace
+.vscode/
+
+# Ignore system-specific files
+._*
+.DS_Store?
+ehthumbs.db
+Icon?
+Thumbs.db
+
+# Ignore any other sensitive or generated files
