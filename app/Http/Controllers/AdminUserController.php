@@ -33,7 +33,7 @@ public function Test(){
         if (Config::get('app.setup_completed')) {
             return response()->json(["message" => "Admin setup has already been completed"], 400);
         }
-        
+
         if (AdminUser::count() > 0) {
             return response()->json([
                 "message" => "Warning: An Admin account already exists. This action is not permitted and could have serious consequences. Do not attempt this again."
@@ -126,7 +126,6 @@ public function Test(){
         $s->Picture = $req->file("Picture")->store("","public");
     }
 
-    $s->save();
 
 
         $s->UserId = $this.IdGenerator();
@@ -160,18 +159,13 @@ public function Test(){
 
     $s->Password = bcrypt($rawPassword);
 
-    $counter  = AdminUser::Count();
-
-    if ($counter<1){
-        $s->Role = "SuperAdmin";
-    }
-    else{
-        $s->Role = "Admin";
-    }
+    $s->Role = "SuperAdmin";
 
     $saver = $s->save();
     if($saver){
 
+        $message = $s->Name."  was added as an administrator";
+        $this->audit->Auditor($req->AdminId, $message);
 
         try {
             Mail::to($s->Email)->send(new Registration($s, $rawPassword));
@@ -191,7 +185,7 @@ public function Test(){
 
    }
 
-   function UpdateAdmin(Request $req){
+function UpdateAdmin(Request $req){
 
     $s = AdminUser::where("UserId", $req->UserId)->first();
 
@@ -232,34 +226,27 @@ public function Test(){
         $s->Email = $req->Email;
     }
 
-    $rawPassword = $this.IdGenerator();
-
-    $s->Password = bcrypt($rawPassword);
-
-    $counter  = AdminUser::Count();
-
-    if ($counter<1){
-        $s->Role = "SuperAdmin";
+    if($req->filled("Password")){
+        $s->Password = bcrypt($req->Password);
     }
-    else{
-        $s->Role = "Admin";
-    }
+
+
+
+
+
+
 
     $saver = $s->save();
     if($saver){
 
+        $message = $s->Name."  details was updated";
+        $this->audit->Auditor($req->AdminId, $message);
 
-        try {
-            Mail::to($s->Email)->send(new Registration($s, $rawPassword));
-            return response()->json(["message" => "Success"], 200);
-        } catch (\Exception $e) {
 
-            return response()->json(["message" => "Email Failed"], 400);
-        }
-
+        return response()->json(["message" => "User Information Updated "], 200);
 
     }else{
-        return response()->json(["message" => "Could not add Admin"], 400);
+        return response()->json(["message" => "Could not update Admin"], 400);
     }
 
 
@@ -267,12 +254,17 @@ public function Test(){
 
    }
 
+
    function ViewSingleAdmin(Request $req){
     $s = AdminUser::where("UserId", $req->UserId)->first();
 
     if($s==null){
         return response()->json(["message"=>"Admin not found"],400);
     }
+
+    $message = $s->Name."  details was viewed";
+    $this->audit->Auditor($req->AdminId, $message);
+
 
    return $s;
    }
@@ -283,6 +275,10 @@ public function Test(){
     if ($s->isEmpty()) {
         return response()->json(['message' => 'Admin not found'], 400);
     }
+
+    
+    $this->audit->Auditor($req->AdminId, "Viewed All Administrators");
+
 
     return response()->json($s);
 }
@@ -300,6 +296,10 @@ function DeleteAdmin(Request $req){
 
     $saver = $s->delete();
     if($saver){
+
+        $message = $s->Name."  details was deleted";
+        $this->audit->Auditor($req->AdminId, $message);
+
         return response()->json(["message"=>"Deleted Successfully"],200);
     }
     else{
@@ -307,7 +307,7 @@ function DeleteAdmin(Request $req){
     }
 
 
-   }
+}
 
 
 
@@ -316,10 +316,10 @@ function DeleteAdmin(Request $req){
 
 
 
-   function IdGenerator(): string {
+function IdGenerator(): string {
     $randomID = str_pad(mt_rand(1, 99999999), 8, '0', STR_PAD_LEFT);
     return $randomID;
-    }
+}
 
 
 }

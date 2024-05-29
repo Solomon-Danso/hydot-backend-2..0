@@ -1,10 +1,12 @@
 <?php
+
 namespace App\Http\Middleware;
 
 use Closure;
-
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use App\Model\Security;
 
 class ApiAuthenticator
 {
@@ -17,10 +19,16 @@ class ApiAuthenticator
             return response()->json(["message" => "Missing authentication headers"], 400);
         }
 
-        if (!Session::has('userId') || Session::getId() !== $sessionId || Session::get('userId') !== $userId) {
+        // Query the sessions table to find the session
+        $session =Security::where('SessionId', $sessionId)
+            ->where('userId', $userId)
+            ->first();
+
+        if (!$session) {
             return response()->json(["message" => "You are not authorised to perform this action"], 401);
         }
 
+        
         return $next($request);
     }
 }
