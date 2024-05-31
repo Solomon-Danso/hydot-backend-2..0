@@ -27,6 +27,9 @@ Route::middleware([ApiAuthenticator::class])->group(function () {
     Route::post('ViewSingleAdmin', [AdminUserController::class, 'ViewSingleAdmin']);
     Route::post('ViewAllAdmin', [AdminUserController::class, 'ViewAllAdmin']);
     Route::post('DeleteAdmin', [AdminUserController::class, 'DeleteAdmin']);
+    Route::post('UnBlockAdmin', [AdminUserController::class, 'UnBlockAdmin']);
+    Route::post('BlockAdmin', [AdminUserController::class, 'BlockAdmin']);
+
 
     Route::post('CreateEmployee', [EmployeeController::class, 'CreateEmployee']);
     Route::post('UpdateEmployee', [EmployeeController::class, 'UpdateEmployee']);

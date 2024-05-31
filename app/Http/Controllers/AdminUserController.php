@@ -276,6 +276,58 @@ function UpdateAdmin(Request $req){
    }
 
 
+   function BlockAdmin(Request $req){
+    $s = AdminUser::where("UserId", $req->UserId)->first();
+
+    if($s==null){
+        return response()->json(["message"=>"Admin not found"],400);
+    }
+
+    $s->IsBlocked=true;
+    $s->LoginAttempt=3;
+
+   
+
+    $saver = $s->save();
+    if($saver){
+        $message = $s->Name."  has been blocked";
+        $this->audit->Auditor($req->AdminId, $message);
+        return response()->json(["message"=>$message],200);
+    }
+    else{
+        return response()->json(["message"=>"Failed to block ".$s->Name],400);
+    }
+
+   }
+
+   function UnBlockAdmin(Request $req){
+    $s = AdminUser::where("UserId", $req->UserId)->first();
+
+    if($s==null){
+        return response()->json(["message"=>"Admin not found"],400);
+    }
+
+    $s->IsBlocked=false;
+    $s->LoginAttempt=0;
+
+   
+
+    $saver = $s->save();
+    if($saver){
+        $message = $s->Name."  has been Unblocked";
+        $this->audit->Auditor($req->AdminId, $message);
+        return response()->json(["message"=>$message],200);
+    }
+    else{
+        return response()->json(["message"=>"Failed to Unblock ".$s->Name],400);
+    }
+
+   }
+
+
+
+
+
 function EditAdmin(Request $req){
 
     $sec = AdminUser::where("Role", "SuperAdmin")->first();
