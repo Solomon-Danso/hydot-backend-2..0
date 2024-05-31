@@ -18,7 +18,7 @@ class AuthenticationController extends Controller
 
 
 
-    public function LogIn(Request $req)
+public function LogIn(Request $req)
     {
 
         // Use your custom Authentication model to authenticate
@@ -27,7 +27,7 @@ class AuthenticationController extends Controller
         if ($user && Hash::check($req->Password, $user->Password)) {
 
             if($user->IsBlocked==true){
-                return response()->json(['message' => 'You have exceeded your Login Attempts'], 500);
+                return response()->json(['message' => 'Your Account Has Been Blocked, Contact Site Administrator For Further Instruction '], 500);
             }
             else{
 
@@ -68,41 +68,100 @@ class AuthenticationController extends Controller
         }
     }
 
-function Unlocker(Request $req){
-    $user = AdminUser::where('Email', $req->email)->first();
-    if($user==null){
-        return response()->json(["message"=>"User does not exist"],400);
-    }
-    $user->Token = null;
-    $user->TokenExpire = null;
-    $user->LoginAttempt = 0;
-    $user -> IsBlocked = false;
 
-    $saver=  $user -> save();
 
- if ($saver) {
-            return response()->json(["Result" => "Success"], 200);
+
+
+
+public function ForgetPasswordStep1(Request $req)
+    {
+
+        // Use your custom Authentication model to authenticate
+        $user = AdminUser::where('Email', $req->Email)->first();
+
+        if ($user) {
+
+            if($user->IsBlocked==true){
+                return response()->json(['message' => 'Your Account Has Been Blocked, Contact Site Administrator For Further Instruction '], 500);
+            }
+            else{
+
+                $user->Token = $this->IdGenerator();
+                $user->TokenExpire = Carbon::now()->addMinutes(10);
+
+                $saver = $user->save();
+                if ($saver) {
+                    // Send email if the request is successful
+                    try {
+                        Mail::to($user->Email)->send(new Authentication( $user->Token));
+                        return response()->json(['message' => $user->Email], 200);
+                    } catch (\Exception $e) {
+
+                        return response()->json(['message' => 'Email Request Failed'], 400);
+                    }
+
+
+
+                } else {
+                    return response()->json(['message' => 'Could not save the Token'], 500);
+                }
+
+
+            }
+
+
         } else {
-            return response()->json(["Result" => "Failed"], 500);
+
+            return response()->json(['message' => 'Invalid credentials'], 401);
         }
-
-
-}
-
-function TestEmail(Request $req){
-    try {
-        Mail::to($req->Email)->send(new Authentication( "Email is working"));
-        return response()->json(['message' => "Email Sent Successfully"], 200);
-    } catch (\Exception $e) {
-
-        return response()->json(['message' => 'Email Request Failed'], 400);
     }
 
-}
 
 
 
-function VerifyToken(Request $req){
+
+
+function ForgetPasswordStep2(Request $req){
+        $user = AdminUser::where('Email', $req->Email)->first();
+    
+        if ($user == null) {
+            return response()->json(["message" => "User does not exist"], 400);
+        }
+    
+        if ($user->Token === $req->token && Carbon::now() <= $user->TokenExpire) {
+            // Invalidate the token and update the user attributes
+            $user->Token = null;
+            $user->TokenExpire = null;
+            $user->LoginAttempt = 0;
+            $user->IsBlocked = false;
+            $user->Password = bcrypt($req->Password);
+    
+            $this-> Securities($user->Email);
+    
+            // Save the user
+            $user->save();
+
+    
+            // Return the response
+            return response()->json(["message" => "Password Updated Successfully"], 200);
+        } else if (Carbon::now() > $user->TokenExpire) {
+            return response()->json(["message" => "Your Token Has Expired"], 400);
+        } else {
+            return response()->json(["message" => "Invalid Token"], 400);
+        }
+    }
+    
+
+
+
+
+
+
+
+
+
+
+    function VerifyToken(Request $req){
     $user = AdminUser::where('Email', $req->Email)->first();
 
     if ($user == null) {

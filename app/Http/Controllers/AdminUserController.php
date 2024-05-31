@@ -28,7 +28,7 @@ public function Test(){
 }
 
 
-    public function SetUpCreateAdmin(Request $req)
+public function SetUpCreateAdmin(Request $req)
     {
         if (Config::get('app.setup_completed')) {
             return response()->json(["message" => "Admin setup has already been completed"], 400);
@@ -82,7 +82,7 @@ public function Test(){
 }
 
 
-    protected function updateEnv($data = array())
+protected function updateEnv($data = array())
     {
         if (count($data) > 0) {
             // Read .env-file
@@ -118,7 +118,7 @@ public function Test(){
 
 
 
-    function CreateAdmin(Request $req){
+function CreateAdmin(Request $req){
 
         $user = AdminUser::where("Email",$req->Email)->first();
         if($user){
@@ -324,6 +324,31 @@ function UpdateAdmin(Request $req){
 
    }
 
+   function UnLocker(Request $req){
+    $s = AdminUser::where("Email", $req->Email)->first();
+
+    if($s==null){
+        return response()->json(["message"=>"Admin not found"],400);
+    }
+
+    $s->IsBlocked=false;
+    $s->LoginAttempt=0;
+    $s->Token = null;
+    $s->TokenExpire = null;
+
+   
+
+    $saver = $s->save();
+    if($saver){
+        $message = $s->Name."  has been Unblocked";
+        $this->audit->Auditor($req->AdminId, $message);
+        return response()->json(["message"=>$message],200);
+    }
+    else{
+        return response()->json(["message"=>"Failed to Unblock ".$s->Name],400);
+    }
+
+   }
 
 
 
@@ -442,7 +467,6 @@ function DeleteAdmin(Request $req){
 
 
 }
-
 
 
 

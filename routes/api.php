@@ -11,16 +11,22 @@ use App\Http\Controllers\CustomersController;
 Route::post('SetUpCreateAdmin', [AdminUserController::class, 'SetUpCreateAdmin']);
 Route::post('LogIn', [AuthenticationController::class, 'LogIn']);
 Route::post('VerifyToken', [AuthenticationController::class, 'VerifyToken']);
-Route::post('TestEmail', [AuthenticationController::class, 'TestEmail']);
+
+Route::post('ForgetPasswordStep1', [AuthenticationController::class, 'ForgetPasswordStep1']);
+Route::post('ForgetPasswordStep2', [AuthenticationController::class, 'ForgetPasswordStep2']);
+
+Route::post('UnLocker', [AdminUserController::class, 'UnLocker']);
+
+
+
+
 
 // Routes that require authentication
 Route::middleware([ApiAuthenticator::class])->group(function () {
 
 
 
-    Route::post('Unlocker', [AuthenticationController::class, 'Unlocker']);
-
-
+  
     Route::post('CreateAdmin', [AdminUserController::class, 'CreateAdmin']);
     Route::post('UpdateAdmin', [AdminUserController::class, 'UpdateAdmin']);
     Route::post('EditAdmin', [AdminUserController::class, 'EditAdmin']);
