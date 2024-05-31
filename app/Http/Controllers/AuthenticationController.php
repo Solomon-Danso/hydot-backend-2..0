@@ -20,17 +20,17 @@ class AuthenticationController extends Controller
 
     public function LogIn(Request $req)
     {
-    
+
         // Use your custom Authentication model to authenticate
         $user = AdminUser::where('Email', $req->Email)->first();
-    
+
         if ($user && Hash::check($req->Password, $user->Password)) {
-            
+
             if($user->IsBlocked==true){
                 return response()->json(['message' => 'You have exceeded your Login Attempts'], 500);
             }
             else{
-                
+
                 $user->Token = $this->IdGenerator();
                 $user->TokenExpire = Carbon::now()->addMinutes(10);
 
@@ -38,15 +38,15 @@ class AuthenticationController extends Controller
                 if ($saver) {
                     // Send email if the request is successful
                     try {
-                        Mail::to("solomondanso2023@gmail.com")->send(new Authentication( $user->Token));
-                        return response()->json(['message' => $user->UserId], 200);
+                        Mail::to($user->Email)->send(new Authentication( $user->Token));
+                        return response()->json(['message' => $user->Email], 200);
                     } catch (\Exception $e) {
-                      
+
                         return response()->json(['message' => 'Email Request Failed'], 400);
                     }
-                    
-           
-                   
+
+
+
                 } else {
                     return response()->json(['message' => 'Could not save the Token'], 500);
                 }
@@ -54,7 +54,7 @@ class AuthenticationController extends Controller
 
             }
 
-           
+
         } else {
             $user->LoginAttempt += 1;
 
@@ -69,7 +69,7 @@ class AuthenticationController extends Controller
     }
 
 function Unlocker(Request $req){
-    $user = AdminUser::where('Email', $req->email)->first(); 
+    $user = AdminUser::where('Email', $req->email)->first();
     if($user==null){
         return response()->json(["message"=>"User does not exist"],400);
     }
@@ -86,6 +86,17 @@ function Unlocker(Request $req){
             return response()->json(["Result" => "Failed"], 500);
         }
 
+
+}
+
+function TestEmail(Request $req){
+    try {
+        Mail::to($req->Email)->send(new Authentication( "Email is working"));
+        return response()->json(['message' => "Email Sent Successfully"], 200);
+    } catch (\Exception $e) {
+
+        return response()->json(['message' => 'Email Request Failed'], 400);
+    }
 
 }
 
@@ -110,12 +121,15 @@ function VerifyToken(Request $req){
         // Save the user
         $user->save();
 
+        $s = Security::where('userId', $user->UserId)->orderBy('created_at', 'desc')->first();
+
         // Prepare the response data
         $responseData = [
             "FullName" => $user->Name,
             "UserId" => $user->UserId,
             "profilePic" => $user->Picture,
             "Role" => $user->Role,
+            "SessionId"=>$s->SessionId
         ];
 
         // Return the response
@@ -157,7 +171,7 @@ function Securities($Email) {
     $device = $this->detectDevice($userAgent);
     $os =  $this->detectOperatingSystem($userAgent);
 
-    
+
     $urlPath = $_SERVER['REQUEST_URI'];
 
     $googleMapsLink = "https://maps.google.com/?q={$latitude}";
@@ -179,8 +193,8 @@ function Securities($Email) {
     $auditTrail->last_activity = Carbon::now()->timestamp;
     $auditTrail->lastLogin = Carbon::now();
 
-   
-    
+
+
 
     $auditTrail->save();
 }
@@ -222,11 +236,11 @@ function TokenGenerator(): string {
         $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$^&*()_+{}|<>-=[],.';
         $length = 30;
         $randomString = '';
-    
+
         for ($i = 0; $i < $length; $i++) {
             $randomString .= $characters[rand(0, strlen($characters) - 1)];
         }
-    
+
         return $randomString;
 }
 

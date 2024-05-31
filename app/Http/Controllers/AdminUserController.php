@@ -120,6 +120,11 @@ public function Test(){
 
     function CreateAdmin(Request $req){
 
+        $user = AdminUser::where("Email",$req->Email)->first();
+        if($user){
+            return response()->json(["message"=>$req->Email." already exist"],400);
+        }
+
     $s = new AdminUser();
 
     if($req->hasFile("Picture")){
@@ -128,7 +133,7 @@ public function Test(){
 
 
 
-        $s->UserId = $this.IdGenerator();
+        $s->UserId = $this->IdGenerator();
 
 
     if($req->filled("Continent")){
@@ -155,21 +160,22 @@ public function Test(){
         $s->Email = $req->Email;
     }
 
-    $rawPassword = $this.IdGenerator();
+    $rawPassword = $this->IdGenerator();
 
     $s->Password = bcrypt($rawPassword);
 
-    $s->Role = "SuperAdmin";
+    $s->Role = "Admin";
 
     $saver = $s->save();
     if($saver){
 
         $message = $s->Name."  was added as an administrator";
+        $message2 = $s->Name."  is added as an administrator";
         $this->audit->Auditor($req->AdminId, $message);
 
         try {
             Mail::to($s->Email)->send(new Registration($s, $rawPassword));
-            return response()->json(["message" => "Success"], 200);
+            return response()->json(["message" => $message2], 200);
         } catch (\Exception $e) {
 
             return response()->json(["message" => "Email Failed"], 400);
@@ -187,7 +193,7 @@ public function Test(){
 
 function UpdateAdmin(Request $req){
 
-    $s = AdminUser::where("UserId", $req->UserId)->first();
+    $s = AdminUser::where("UserId", $req->header('UserId'))->first();
 
     if($s==null){
         return response()->json(["message"=>"Admin not found"],400);
@@ -199,7 +205,7 @@ function UpdateAdmin(Request $req){
 
 
 
-        $s->UserId = $this.IdGenerator();
+
 
 
     if($req->filled("Continent")){
@@ -269,6 +275,83 @@ function UpdateAdmin(Request $req){
    return $s;
    }
 
+
+function EditAdmin(Request $req){
+
+    $sec = AdminUser::where("Role", "SuperAdmin")->first();
+
+    $s = AdminUser::where("UserId", $req->AdminUserId)->first();
+    if($s==null){
+        return response()->json(["message"=>"Wrong Administrator Id"],400);
+
+    }
+
+    if($sec->Email === $req->Email){
+        return response()->json(["message"=>"You cannot assign a Super Administrator email to a regular administrator. "],400);
+    }
+
+    if($req->hasFile("Picture")){
+        $s->Picture = $req->file("Picture")->store("","public");
+    }
+
+
+
+
+
+
+    if($req->filled("Continent")){
+        $s->Continent = $req->Continent;
+    }
+
+    if($req->filled("Country")){
+        $s->Country = $req->Country;
+    }
+
+    if($req->filled("Name")){
+        $s->Name = $req->Name;
+    }
+
+    if($req->filled("Location")){
+        $s->Location = $req->Location;
+    }
+
+    if($req->filled("Phone")){
+        $s->Phone = $req->Phone;
+    }
+
+    if($req->filled("Email")){
+        $s->Email = $req->Email;
+    }
+
+    if($req->filled("Password")){
+        $s->Password = bcrypt($req->Password);
+    }
+
+
+
+
+
+
+
+    $saver = $s->save();
+    if($saver){
+
+        $message = $s->Name."  details was updated";
+        $this->audit->Auditor($req->AdminId, $message);
+
+
+        return response()->json(["message" => "User Information Updated "], 200);
+
+    }else{
+        return response()->json(["message" => "Could not update Admin"], 400);
+    }
+
+
+
+
+   }
+
+
    function ViewAllAdmin(Request $req) {
     $s = AdminUser::where('Role', '!=', 'SuperAdmin')->get();
 
@@ -276,13 +359,12 @@ function UpdateAdmin(Request $req){
         return response()->json(['message' => 'Admin not found'], 400);
     }
 
-    
+
     $this->audit->Auditor($req->AdminId, "Viewed All Administrators");
 
 
     return response()->json($s);
 }
-
 
 
 

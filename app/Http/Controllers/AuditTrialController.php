@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\AdminUser;
 use App\Models\SessionMgmt;
+use App\Models\AuditTrial;
+
 
 class AuditTrialController extends Controller
 {
@@ -35,7 +37,7 @@ class AuditTrialController extends Controller
         // URL path
         $urlPath = $_SERVER['REQUEST_URI'];
 
-        $stu = Admin::where('UserId', $UserId)->first();
+        $stu = AdminUser::where('UserId', $UserId)->first();
         if($stu==null){
             return response()->json(["message"=>"Admin does not exist"],400);
         }
@@ -45,7 +47,7 @@ class AuditTrialController extends Controller
         $googleMapsLink = "https://maps.google.com/?q={$latitude}";
 
         // Create a new AuditTrail instance and save the log to the database
-        $auditTrail = new AuditTrail();
+        $auditTrail = new AuditTrial();
         $auditTrail->ipAddress = $ipAddress??" ";
         $auditTrail->country = $country??" ";
         $auditTrail->city = $city??" ";
@@ -54,9 +56,10 @@ class AuditTrialController extends Controller
         $auditTrail->urlPath = $urlPath??" ";
         $auditTrail->action = $Action??" ";
         $auditTrail->googlemap = $googleMapsLink??" ";
-        $auditTrail -> userId = $stu->UserIdId??" ";
+        $auditTrail -> userId = $stu->UserId??" ";
         $auditTrail -> userName = $stu->Name;
         $auditTrail -> userPic = $stu->Picture??" ";
+        $auditTrail -> companyId = $stu->UserId??" ";
         
 
         $auditTrail->save();

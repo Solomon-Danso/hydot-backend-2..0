@@ -4,13 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use App\Models\Employee;
+use App\Models\Customers;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\AuditTrialController;
 use Illuminate\Support\Facades\Config;
-use App\Mail\EmployeeRegistration;
+use App\Mail\CustomersRegistration;
 
-class EmployeeController extends Controller
+class CustomersController extends Controller
 {
 
     protected $audit;
@@ -25,14 +25,14 @@ class EmployeeController extends Controller
 
 
 
-    function CreateEmployee(Request $req){
+    function CreateCustomers(Request $req){
 
-        $user = Employee::where("Email",$req->Email)->first();
+        $user = Customers::where("Email",$req->Email)->first();
         if($user){
             return response()->json(["message"=>$req->Email." already exist"],400);
         }
 
-    $s = new Employee();
+    $s = new Customers();
 
     if($req->hasFile("Picture")){
         $s->Picture = $req->file("Picture")->store("","public");
@@ -68,17 +68,16 @@ class EmployeeController extends Controller
     }
 
 
-    $s->Role = "Employee";
 
     $saver = $s->save();
     if($saver){
 
-        $message = $s->Name."  was added as an employee";
-        $message2 = $s->Name."  is added as an employee";
+        $message = $s->Name."  was added as an Customers";
+        $message2 = $s->Name."  is added as an Customers";
         $this->audit->Auditor($req->AdminId, $message);
 
         try {
-            Mail::to($s->Email)->send(new EmployeeRegistration($s));
+            Mail::to($s->Email)->send(new CustomersRegistration($s));
             return response()->json(["message" => $message2], 200);
         } catch (\Exception $e) {
 
@@ -94,12 +93,12 @@ class EmployeeController extends Controller
 
    }
 
-function UpdateEmployee(Request $req){
+function UpdateCustomers(Request $req){
 
-    $s = Employee::where("UserId", $req->EmployeeUserId)->first();
+    $s = Customers::where("UserId", $req->CustomersUserId)->first();
 
     if($s==null){
-        return response()->json(["message"=>"Employee not found"],400);
+        return response()->json(["message"=>"Customers not found"],400);
     }
 
     if($req->hasFile("Picture")){
@@ -155,7 +154,7 @@ function UpdateEmployee(Request $req){
         return response()->json(["message" => "User Information Updated "], 200);
 
     }else{
-        return response()->json(["message" => "Could not update Employee"], 400);
+        return response()->json(["message" => "Could not update Customers"], 400);
     }
 
 
@@ -164,11 +163,11 @@ function UpdateEmployee(Request $req){
    }
 
 
-   function ViewSingleEmployee(Request $req){
-    $s = Employee::where("UserId", $req->UserId)->first();
+   function ViewSingleCustomers(Request $req){
+    $s = Customers::where("UserId", $req->UserId)->first();
 
     if($s==null){
-        return response()->json(["message"=>"Employee not found"],400);
+        return response()->json(["message"=>"Customers not found"],400);
     }
 
     $message = $s->Name."  details was viewed";
@@ -178,88 +177,11 @@ function UpdateEmployee(Request $req){
    return $s;
    }
 
-
-function EditEmployee(Request $req){
-
-    $sec = Employee::where("Role", "SuperEmployee")->first();
-
-    $s = Employee::where("UserId", $req->AdminId)->first();
-    if($s==null){
-        return response()->json(["message"=>"Wrong Employeeistrator Id"],400);
-
-    }
-
-    if($sec->Email === $req->Email){
-        return response()->json(["message"=>"You cannot assign a Super Employeeistrator email to a regular Employeeistrator. "],400);
-    }
-
-    if($req->hasFile("Picture")){
-        $s->Picture = $req->file("Picture")->store("","public");
-    }
-
-
-
-
-
-
-    if($req->filled("Continent")){
-        $s->Continent = $req->Continent;
-    }
-
-    if($req->filled("Country")){
-        $s->Country = $req->Country;
-    }
-
-    if($req->filled("Name")){
-        $s->Name = $req->Name;
-    }
-
-    if($req->filled("Location")){
-        $s->Location = $req->Location;
-    }
-
-    if($req->filled("Phone")){
-        $s->Phone = $req->Phone;
-    }
-
-    if($req->filled("Email")){
-        $s->Email = $req->Email;
-    }
-
-    if($req->filled("Password")){
-        $s->Password = bcrypt($req->Password);
-    }
-
-
-
-
-
-
-
-    $saver = $s->save();
-    if($saver){
-
-        $message = $s->Name."  details was updated";
-        $this->audit->Auditor($req->AdminId, $message);
-
-
-        return response()->json(["message" => "User Information Updated "], 200);
-
-    }else{
-        return response()->json(["message" => "Could not update Employee"], 400);
-    }
-
-
-
-
-   }
-
-
-   function ViewAllEmployee(Request $req) {
-    $s = Employee::where('Role', '!=', 'SuperEmployee')->get();
+   function ViewAllCustomers(Request $req) {
+    $s = Customers::get();
 
     if ($s->isEmpty()) {
-        return response()->json(['message' => 'Employee not found'], 400);
+        return response()->json(['message' => 'Customers not found'], 400);
     }
 
 
@@ -272,11 +194,13 @@ function EditEmployee(Request $req){
 
 
 
-function DeleteEmployee(Request $req){
-    $s = Employee::where("UserId", $req->UserId)->first();
+
+
+function DeleteCustomers(Request $req){
+    $s = Customers::where("UserId", $req->UserId)->first();
 
     if($s==null){
-        return response()->json(["message"=>"Employee not found"],400);
+        return response()->json(["message"=>"Customers not found"],400);
     }
 
     $saver = $s->delete();
