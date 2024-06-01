@@ -4,64 +4,57 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Hero;
+use App\Http\Controllers\AuditTrialController;
 
 class Websites extends Controller
 {
-    /*
-    function CreateHero(Request $req){
-        $s = Hero::firstOrNew();
 
-        if($req->hasFile("Picture1")){
-            $s->Picture1 = $req->file("Picture1")->store("","public");
-        }
-
-        if($req->hasFile("Picture2")){
-            $s->Picture2 = $req->file("Picture2")->store("","public");
-        }
-
-        if($req->hasFile("Picture3")){
-            $s->Picture3 = $req->file("Picture3")->store("","public");
-        }
-
-        if($req->hasFile("Picture4")){
-            $s->Picture4 = $req->file("Picture4")->store("","public");
-        }
-
-        if($req->hasFile("Picture5")){
-            $s->Picture5 = $req->file("Picture5")->store("","public");
-        }
-
-        if($req->hasFile("Picture6")){
-            $s->Picture6 = $req->file("Picture6")->store("","public");
-        }
+    protected $audit;
 
 
-        if($req->filled("Section1")){
-            $s->Section1 = $req->Section1;
-        }
-
-        if($req->filled("Section2")){
-            $s->Section2 = $req->Section2;
-        }
-
-        if($req->filled("Section3")){
-            $s->Section3 = $req->Section3;
-        }
-
-        if($req->filled("Section4")){
-            $s->Section4 = $req->Section4;
-        }
-
-
-
-
-
-
+    public function __construct(AuditTrialController $auditTrialController)
+    {
+        $this->audit = $auditTrialController;
 
     }
-    */
 
+
+    function CreateHero(Request $req) {
+        $s =  Hero::firstOrNew();
+        $fields = ['Picture1', 'Picture2', 'Picture3', 'Picture4', 'Picture5', 'Picture6'];
+        
+        foreach ($fields as $field) {
+            if ($req->hasFile($field)) {
+                $s->$field = $req->file($field)->store("", "public");
+            }
+        }
     
+        $sections = ['Section1', 'Section2', 'Section3', 'Section4']; // Added missing semicolon here
+        
+        foreach ($sections as $sec) {
+            if ($req->filled($sec)) {
+                $s->$sec = $req->$sec;
+            }
+        }
+    
+        $saver = $s->save();
+        if ($saver) {
+            $message = "Hero Was Created";
+            $this->audit->Auditor($req->AdminId, $message);
+    
+            return response()->json(["message" => "Hero Created Successfully"], 200);
+        } else {
+            return response()->json(["message" => "An error occurred creating hero"], 400);
+        }
+    }
+    
+
+   function ViewHero(){
+    return Hero::get();
+   }
+
+
+
 
 
 

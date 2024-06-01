@@ -40,10 +40,7 @@ public function SetUpCreateAdmin(Request $req)
             ], 400);
         }
 
-        if (Config::get('app.setup_completed')) {
-            return response()->json(["message" => "Admin setup has already been completed"], 400);
-        }
-
+       
         $s = new AdminUser();
 
         if ($req->hasFile("Picture")) {
@@ -276,7 +273,7 @@ function UpdateAdmin(Request $req){
    }
 
 
-   function BlockAdmin(Request $req){
+function BlockAdmin(Request $req){
     $s = AdminUser::where("UserId", $req->UserId)->first();
 
     if($s==null){
@@ -286,7 +283,7 @@ function UpdateAdmin(Request $req){
     $s->IsBlocked=true;
     $s->LoginAttempt=3;
 
-   
+
 
     $saver = $s->save();
     if($saver){
@@ -310,7 +307,7 @@ function UpdateAdmin(Request $req){
     $s->IsBlocked=false;
     $s->LoginAttempt=0;
 
-   
+
 
     $saver = $s->save();
     if($saver){
@@ -336,7 +333,7 @@ function UpdateAdmin(Request $req){
     $s->Token = null;
     $s->TokenExpire = null;
 
-   
+
 
     $saver = $s->save();
     if($saver){
