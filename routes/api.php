@@ -53,6 +53,36 @@ Route::middleware([ApiAuthenticator::class])->group(function () {
     Route::post('CreateHero', [Websites::class, 'CreateHero']);
     Route::post('ViewHero', [Websites::class, 'ViewHero']);
 
+    Route::post('CreateWhatWeDo', [Websites::class, 'CreateWhatWeDo']);
+    Route::post('ViewWhatWeDo', [Websites::class, 'ViewWhatWeDo']);
+
+    Route::post('CreateOurDifferences', [Websites::class, 'CreateOurDifferences']);
+    Route::post('ViewOurDifferences', [Websites::class, 'ViewOurDifferences']);
+
+    Route::post('CreateOurProcess', [Websites::class, 'CreateOurProcess']);
+    Route::post('ViewOurProcess', [Websites::class, 'ViewOurProcess']);
+
+    Route::post('CreateOurPortfolioHeader', [Websites::class, 'CreateOurPortfolioHeader']);
+    Route::post('ViewOurPortfolioHeader', [Websites::class, 'ViewOurPortfolioHeader']);
+
+    Route::post('CreateOurPortfolioProjects', [Websites::class, 'CreateOurPortfolioProjects']);
+    Route::post('UpdateOurPortfolioProjects', [Websites::class, 'UpdateOurPortfolioProjects']);
+    Route::post('ViewOurPortfolioProjects', [Websites::class, 'ViewOurPortfolioProjects']);
+    Route::post('DeleteOurPortfolioProjects', [Websites::class, 'DeleteOurPortfolioProjects']);
+
+    Route::post('CreateOurClientsHeader', [Websites::class, 'CreateOurClientsHeader']);
+    Route::post('ViewOurClientsHeader', [Websites::class, 'ViewOurClientsHeader']);
+
+    Route::post('CreateOurClientsProjects', [Websites::class, 'CreateOurClientsProjects']);
+    Route::post('UpdateOurClientsProjects', [Websites::class, 'UpdateOurClientsProjects']);
+    Route::post('ViewOurClientsProjects', [Websites::class, 'ViewOurClientsProjects']);
+    Route::post('DeleteOurClientsProjects', [Websites::class, 'DeleteOurClientsProjects']);
+
+    Route::post('CreateTestimonials', [Websites::class, 'CreateTestimonials']);
+    Route::post('UpdateTestimonials', [Websites::class, 'UpdateTestimonials']);
+    Route::post('ViewTestimonials', [Websites::class, 'ViewTestimonials']);
+    Route::post('DeleteTestimonials', [Websites::class, 'DeleteTestimonials']);
+
 
 
 

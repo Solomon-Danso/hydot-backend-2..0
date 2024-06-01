@@ -322,7 +322,7 @@ function BlockAdmin(Request $req){
    }
 
    function UnLocker(Request $req){
-    $s = AdminUser::where("Email", $req->Email)->first();
+    $s = AdminUser::where("Email", $req->Email)->where('Role', 'SuperAdmin')->first();
 
     if($s==null){
         return response()->json(["message"=>"Admin not found"],400);
