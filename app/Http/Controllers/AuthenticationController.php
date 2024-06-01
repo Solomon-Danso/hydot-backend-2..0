@@ -56,11 +56,14 @@ public function LogIn(Request $req)
 
 
         } else {
+            if($user->IsBlocked==true){
+                return response()->json(['message' => 'Your Account Has Been Blocked, Contact Site Administrator For Further Instruction '], 500);
+            }
             $user->LoginAttempt += 1;
 
             if($user->LoginAttempt>2){
                 $user->IsBlocked=true;
-
+                $user->save();
             }
             $user->save();
 
@@ -73,7 +76,8 @@ public function LogIn(Request $req)
 
 
 
-public function ForgetPasswordStep1(Request $req)
+
+    public function ForgetPasswordStep1(Request $req)
     {
 
         // Use your custom Authentication model to authenticate
@@ -94,7 +98,7 @@ public function ForgetPasswordStep1(Request $req)
                     // Send email if the request is successful
                     try {
                         Mail::to($user->Email)->send(new Authentication( $user->Token));
-                        return response()->json(['message' => $user->Email], 200);
+                        return response()->json(['message' => "A verification token has been sent to ".$user->Email], 200);
                     } catch (\Exception $e) {
 
                         return response()->json(['message' => 'Email Request Failed'], 400);
@@ -123,11 +127,11 @@ public function ForgetPasswordStep1(Request $req)
 
 function ForgetPasswordStep2(Request $req){
         $user = AdminUser::where('Email', $req->Email)->first();
-    
+
         if ($user == null) {
             return response()->json(["message" => "User does not exist"], 400);
         }
-    
+
         if ($user->Token === $req->token && Carbon::now() <= $user->TokenExpire) {
             // Invalidate the token and update the user attributes
             $user->Token = null;
@@ -135,13 +139,13 @@ function ForgetPasswordStep2(Request $req){
             $user->LoginAttempt = 0;
             $user->IsBlocked = false;
             $user->Password = bcrypt($req->Password);
-    
+
             $this-> Securities($user->Email);
-    
+
             // Save the user
             $user->save();
 
-    
+
             // Return the response
             return response()->json(["message" => "Password Updated Successfully"], 200);
         } else if (Carbon::now() > $user->TokenExpire) {
@@ -150,7 +154,7 @@ function ForgetPasswordStep2(Request $req){
             return response()->json(["message" => "Invalid Token"], 400);
         }
     }
-    
+
 
 
 
