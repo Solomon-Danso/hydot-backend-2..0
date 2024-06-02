@@ -7,6 +7,9 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\Websites;
+use App\Http\Controllers\Finance;
+
+
 
 // Route for setting up the admin, accessible without authentication
 Route::post('SetUpCreateAdmin', [AdminUserController::class, 'SetUpCreateAdmin']);
@@ -84,6 +87,10 @@ Route::middleware([ApiAuthenticator::class])->group(function () {
     Route::post('DeleteTestimonials', [Websites::class, 'DeleteTestimonials']);
 
 
+    Route::post('CreateSales', [Websites::class, 'CreateSales']);
+    Route::post('ApproveSales', [Websites::class, 'ApproveSales']);
+    Route::post('ViewSales', [Websites::class, 'ViewSales']);
+   
 
 
 
