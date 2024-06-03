@@ -276,7 +276,6 @@ class Websites extends Controller
         $s->ProjectName = $req->ProjectName;
     }
 
-    $s->ProjectId = $this->IdGenerator();
 
 
     $saver = $s->save();
