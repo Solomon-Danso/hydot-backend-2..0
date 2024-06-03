@@ -8,6 +8,7 @@ use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\Websites;
 use App\Http\Controllers\Finance;
+use App\Http\Controllers\ClientApiController;
 
 
 
@@ -30,7 +31,7 @@ Route::middleware([ApiAuthenticator::class])->group(function () {
 
 
 
-  
+
     Route::post('CreateAdmin', [AdminUserController::class, 'CreateAdmin']);
     Route::post('UpdateAdmin', [AdminUserController::class, 'UpdateAdmin']);
     Route::post('EditAdmin', [AdminUserController::class, 'EditAdmin']);
@@ -87,10 +88,27 @@ Route::middleware([ApiAuthenticator::class])->group(function () {
     Route::post('DeleteTestimonials', [Websites::class, 'DeleteTestimonials']);
 
 
-    Route::post('CreateSales', [Websites::class, 'CreateSales']);
-    Route::post('ApproveSales', [Websites::class, 'ApproveSales']);
-    Route::post('ViewSales', [Websites::class, 'ViewSales']);
-   
+    Route::post('CreateSales', [Finance::class, 'CreateSales']);
+    Route::post('ViewSales', [Finance::class, 'ViewSales']);
+    Route::post('ViewOneSale', [Finance::class, 'ViewOneSale']);
+    Route::post('RegenerateTransactionId', [Finance::class, 'RegenerateTransactionId']);
+
+    Route::post('CreateExpenses', [Finance::class, 'CreateExpenses']);
+    Route::post('ViewExpenses', [Finance::class, 'ViewExpenses']);
+    
+
+
+    Route::post('ConfigurePrice', [Finance::class, 'ConfigurePrice']);
+    Route::post('UpdatePrice', [Finance::class, 'UpdatePrice']);
+    Route::post('GetAllPrice', [Finance::class, 'GetAllPrice']);
+    Route::post('DeletePrice', [Finance::class, 'DeletePrice']);    
+
+
+    Route::post("CreateClientApiServerURL",[ClientApiController::class,'CreateClientApiServerURL']);
+Route::post("UpdateClientApiServerURL",[ClientApiController::class,'UpdateClientApiServerURL']);
+Route::post("ViewClientApiServerURL",[ClientApiController::class,'ViewClientApiServerURL']);
+Route::post("DeleteClientApiServerURL",[ClientApiController::class,'DeleteClientApiServerURL']);
+Route::post("ViewAllClientApiServerURL",[ClientApiController::class,'ViewAllClientApiServerURL']);
 
 
 

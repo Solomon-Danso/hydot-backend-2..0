@@ -19,13 +19,23 @@ return new class extends Migration
             $table->longText("CustomerName")->nullable();
             $table->longText("PaymentMethod")->nullable();
             $table->longText("PaymentReference")->nullable();
-            $table->decimal("Amount", 65, 30)->nullable();
+            $table->decimal("Amount", 38, 30)->nullable();
             $table->longText("Created_By_Id")->nullable();
             $table->longText("Created_By_Name")->nullable();
             $table->boolean("IsApproved")->default(false);
             $table->longText("Approved_By_Id")->nullable();
             $table->longText("Approved_By_Name")->nullable();
             $table ->longText("TransactionId") -> nullable();
+            $table->longText("PricingType")->nullable();
+            $table->integer("SubscriptionPeriodInDays")->nullable();
+            $table->dateTime("StartDate")->nullable();
+            $table->dateTime("SystemDate")->nullable();
+            $table->dateTime("CurrentDate")->nullable();
+            $table->dateTime("ExpireDate")->nullable();
+           
+
+         
+
 
 
 

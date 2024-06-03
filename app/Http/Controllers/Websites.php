@@ -259,7 +259,7 @@ class Websites extends Controller
    function UpdateOurPortfolioProjects(Request $req){
   
   
-    $s =  OurPortfolioProjects::where('id',$req->Id)->first();
+    $s =  OurPortfolioProjects::where('ProjectId',$req->ProjectId)->first();
     if($s==null){
         return response()->json(["message"=>"Projects does not exist"],400);
     }
