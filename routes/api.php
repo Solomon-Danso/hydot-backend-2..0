@@ -9,7 +9,7 @@ use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\Websites;
 use App\Http\Controllers\Finance;
 use App\Http\Controllers\ClientApiController;
-
+use App\Http\Controllers\APPS;
 
 
 // Route for setting up the admin, accessible without authentication
@@ -109,6 +109,13 @@ Route::post("UpdateClientApiServerURL",[ClientApiController::class,'UpdateClient
 Route::post("ViewClientApiServerURL",[ClientApiController::class,'ViewClientApiServerURL']);
 Route::post("DeleteClientApiServerURL",[ClientApiController::class,'DeleteClientApiServerURL']);
 Route::post("ViewAllClientApiServerURL",[ClientApiController::class,'ViewAllClientApiServerURL']);
+
+
+Route::post('CreateSchedular', [APPS::class, 'CreateSchedular']);
+Route::post('UpdateSchedular', [APPS::class, 'UpdateSchedular']);
+Route::post('DeleteSchedule', [APPS::class, 'DeleteSchedule']);
+Route::post('GetSchedule', [APPS::class, 'GetSchedule']);    
+
 
 
 

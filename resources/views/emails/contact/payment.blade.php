@@ -53,31 +53,35 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">Hydot Tech</div>
+        <div class="header">{{ config('app.name') }}!</div>
 
         <div class="details">
             <div>
-                <p>Date: 03-June-2024</p>
-                <p>Payment Mode: Cash</p>
+                <p>Date: {{ $Sales->StartDate }}</p>
+                <p>Payment Mode: {{ $Sales->PaymentMethod }}</p>
             </div>
             <div>
-                <p>Receipt No: VJSDVHCHSD738</p>
-                <p>Bank Reference: gykdsfkvsdksdfvhas</p>
+                <p>TransactionId: {{ $Sales->TransactionId }}</p>
+                <p>Payment Reference: {{ $Sales->PaymentReference }}</p>
             </div>
         </div>
 
         <div class="summary">
-            <p>Customer Id: <b>001</b></p>
-            <p>Customer Name: <b>Agency Website</b></p>
-            <p>Product Id: <b>001</b></p>
-            <p>Product Name: <b>Agency Website</b></p>
-            <p>Payment Method: <b>Cash</b></p>
-            <p>Payment Reference: <b>Agency Website</b></p>
+            <p>Customer Id: <b>{{ $Sales->CustomerId }}</b></p>
+            <p>Customer Name: <b>{{ $Sales->CustomerName }}</b></p>
+            <p>Product Id: <b>{{ $Sales->ProductId }}</b></p>
+            <p>Product Name: <b>{{ $Sales->ProductName }}</b></p>
+            <p>Start Date: <b>{{ $Sales->StartDate }}</b></p>
+            <p>Expire Date: <b>{{ $Sales->ExpireDate }}</b></p>
         </div>
 
         <div class="footer">
-            <p>Amount Paid: $2900.00</p>
-            <p>Authorized By: Danso Solomon</p>
+            <p>Amount Paid: <b>{{ $Sales->Amount }}</b></p>
+            <p>Authorized By: <b>{{ $Sales->Approved_By_Name }}</b></p>
+        </div>
+
+        <div class="footer">
+            &copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.
         </div>
     </div>
 </body>

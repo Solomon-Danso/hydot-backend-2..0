@@ -4,27 +4,29 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\ClientApi;
+use App\Models\Customers;
 
 class ClientApiController extends Controller
 {
     function CreateClientApiServerURL(Request $req){
+
+        $s = Customers::where('UserId', $req->CustomerId)->first();
+        if ($s==null) {
+            return response()->json(['message' => 'Customer not found'], 400);
+        }
+
+
         $c = new ClientApi();
 
-        if($req->filled("CompanyId")){
-            $c->CompanyId = $req->CompanyId;
-        }
+      
+            $c->CompanyId = $s->UserId;
+        
+            $c->CompanyName = $s->Name;
+        
+            $c->CompanyEmail = $s->Email;
 
-        if($req->filled("CompanyName")){
-            $c->CompanyName = $req->CompanyName;
-        }
+            $c->CompanyPhone = $s->Phone;
 
-        if($req->filled("CompanyEmail")){
-            $c->CompanyEmail = $req->CompanyEmail;
-        }
-
-        if($req->filled("CompanyPhone")){
-            $c->CompanyPhone = $req->CompanyPhone;
-        }
 
         if($req->filled("ApiServerURL")){
             $c->ApiServerURL = $req->ApiServerURL;
@@ -53,28 +55,13 @@ class ClientApiController extends Controller
             return response()->json(["message"=>"ApiServerURL for this company not found"],400);
         }
 
-        if($req->filled("CompanyId")){
-            $c->CompanyId = $req->CompanyId;
-        }
-
-        if($req->filled("CompanyName")){
-            $c->CompanyName = $req->CompanyName;
-        }
-
-        if($req->filled("ApiMediaURL")){
-            $c->ApiMediaURL = $req->ApiMediaURL;
-        }
-
-        if($req->filled("CompanyEmail")){
-            $c->CompanyEmail = $req->CompanyEmail;
-        }
-
-        if($req->filled("CompanyPhone")){
-            $c->CompanyPhone = $req->CompanyPhone;
-        }
+       
 
         if($req->filled("ApiServerURL")){
             $c->ApiServerURL = $req->ApiServerURL;
+        }
+        if($req->filled("ApiMediaURL")){
+            $c->ApiMediaURL = $req->ApiMediaURL;
         }
 
         $saver= $c->save();

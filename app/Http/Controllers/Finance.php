@@ -12,6 +12,7 @@ use App\Models\OurPortfolioProjects;
 use App\Models\Customers;
 use Carbon\Carbon;
 use App\Models\Expenses;
+use App\Mail\PaymentInvoice;
 
 
 
@@ -38,7 +39,7 @@ function CreateSales(Request $req){
         }
 
         if ($c==null) {
-            return response()->json(['message' => 'Customers not found'], 400);
+            return response()->json(['message' => 'Customer not found'], 400);
         }
 
         if ($p==null) {
@@ -93,7 +94,7 @@ function CreateSales(Request $req){
                 $this->audit->Auditor($req->AdminId, $message);
         
                 try {
-                    //Mail::to($t->CompanyEmail)->send(new Subscription($existingToken));
+                    Mail::to($c->Email)->send(new PaymentInvoice($existingToken));
                     return response()->json(["message" => $message], 200);
                 } catch (\Exception $e) {
                     return response()->json(["message" => "Email Failed To Send"], 400);
@@ -116,7 +117,7 @@ function CreateSales(Request $req){
                 $message = $s->CustomerName."  made a payment of ".$s->Amount." for ".$s->ProductName;
                 $this->audit->Auditor($req->AdminId, $message);
                 try {
-                   // Mail::to($t->CompanyEmail)->send(new Subscription($t));
+                    Mail::to($c->Email)->send(new PaymentInvoice($s));
                     return response()->json(["message" => "Payment made Successfully"], 200);
                 } catch (\Exception $e) {
                     return response()->json(["message" => "Email Failed To Send"], 400);
@@ -184,7 +185,7 @@ function RegenerateTransactionId(Request $req){
         $message = $s->CustomerName."  payment transaction ID was regenerated";
         $this->audit->Auditor($req->AdminId, $message);
         try {
-           // Mail::to($t->CompanyEmail)->send(new Subscription($t));
+            Mail::to($c->Email)->send(new PaymentInvoice($s));
             return response()->json(["message" => "Operation was Successfully"], 200);
         } catch (\Exception $e) {
             return response()->json(["message" => "Email Failed To Send"], 400);
@@ -330,7 +331,9 @@ function ViewExpenses(){
     return Expenses::get();
 }
 
-
+function CreateCalenderData(Request $req){
+    
+}
 
 
 
