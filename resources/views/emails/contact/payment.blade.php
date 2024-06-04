@@ -55,15 +55,13 @@
     <div class="container">
         <div class="header">{{ config('app.name') }}!</div>
 
-        <div class="details">
-            <div>
+        <div class="summary">
+            
                 <p>Date: {{ $Sales->StartDate }}</p>
                 <p>Payment Mode: {{ $Sales->PaymentMethod }}</p>
-            </div>
-            <div>
                 <p>TransactionId: {{ $Sales->TransactionId }}</p>
                 <p>Payment Reference: {{ $Sales->PaymentReference }}</p>
-            </div>
+           
         </div>
 
         <div class="summary">
@@ -75,9 +73,9 @@
             <p>Expire Date: <b>{{ $Sales->ExpireDate }}</b></p>
         </div>
 
-        <div class="footer">
+        <div class="summary">
             <p>Amount Paid: <b>{{ $Sales->Amount }}</b></p>
-            <p>Authorized By: <b>{{ $Sales->Approved_By_Name }}</b></p>
+            <p>Authorized By: <b>{{ $Sales->Created_By_Name }}</b></p>
         </div>
 
         <div class="footer">

@@ -95,13 +95,12 @@ Route::middleware([ApiAuthenticator::class])->group(function () {
 
     Route::post('CreateExpenses', [Finance::class, 'CreateExpenses']);
     Route::post('ViewExpenses', [Finance::class, 'ViewExpenses']);
-    
+
 
 
     Route::post('ConfigurePrice', [Finance::class, 'ConfigurePrice']);
-    Route::post('UpdatePrice', [Finance::class, 'UpdatePrice']);
-    Route::post('GetAllPrice', [Finance::class, 'GetAllPrice']);
-    Route::post('DeletePrice', [Finance::class, 'DeletePrice']);    
+     Route::post('GetAllPrice', [Finance::class, 'GetAllPrice']);
+    Route::post('DeletePrice', [Finance::class, 'DeletePrice']);
 
 
     Route::post("CreateClientApiServerURL",[ClientApiController::class,'CreateClientApiServerURL']);
@@ -114,7 +113,7 @@ Route::post("ViewAllClientApiServerURL",[ClientApiController::class,'ViewAllClie
 Route::post('CreateSchedular', [APPS::class, 'CreateSchedular']);
 Route::post('UpdateSchedular', [APPS::class, 'UpdateSchedular']);
 Route::post('DeleteSchedule', [APPS::class, 'DeleteSchedule']);
-Route::post('GetSchedule', [APPS::class, 'GetSchedule']);    
+Route::post('GetSchedule', [APPS::class, 'GetSchedule']);
 
 
 

@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\AuditTrialController;
 use App\Models\Sales;
 use App\Models\AdminUser;
-use APP\Models\PriceConfiguration;
+use App\Models\PriceConfiguration;
 use App\Models\OurPortfolioProjects;
 use App\Models\Customers;
 use Carbon\Carbon;
@@ -48,10 +48,10 @@ function CreateSales(Request $req){
 
         $s = new Sales();
 
-    
+
 
         $s->Created_By_Id = $req->AdminId;
-        $s->Created_By_Name = $a->Name;  
+        $s->Created_By_Name = $a->Name;
         $s->TransactionId = $this->TokenGenerator();
         $s->ProductId = $p->ProductId;
         $s->ProductName = $p->ProductName;
@@ -64,26 +64,28 @@ function CreateSales(Request $req){
         }
 
         if($req->filled("PaymentReference")){
-            $s->PaymentMethod = $req->PaymentMethod;
+            $s->PaymentReference = $req->PaymentReference;
         }
 
         if($req->filled("Amount")){
             $s->Amount = $req->Amount;
         }
 
+        
+
         $s->SubscriptionPeriodInDays = ceil($req->Amount / $p->Amount);
         $currentDate = Carbon::now();
-    
+
         $s->StartDate = $currentDate;
         $s->SystemDate = $currentDate;
 
-        $existingToken = Sales::where('CompanyId', $c->UserId)->where('ProductId', $p->ProductId)->first();
-    
+        $existingToken = Sales::where('CustomerId', $c->UserId)->where('ProductId', $p->ProductId)->first();
+
         if($existingToken){
             // Add the new subscription days to the remaining days of the existing subscription
             $existingExpireDate = Carbon::parse($existingToken->ExpireDate);
             $existingRemainingDays = $existingExpireDate->diffInDays($currentDate);
-    
+
             $extendedExpireDate = $currentDate->copy()->addDays($s->SubscriptionPeriodInDays + $existingRemainingDays);
             $existingToken->ExpireDate = $extendedExpireDate;
             $saver=$existingToken->save();
@@ -92,7 +94,7 @@ function CreateSales(Request $req){
 
                 $message = $s->CustomerName."  made a payment of ".$s->Amount." for ".$s->ProductName;
                 $this->audit->Auditor($req->AdminId, $message);
-        
+
                 try {
                     Mail::to($c->Email)->send(new PaymentInvoice($existingToken));
                     return response()->json(["message" => $message], 200);
@@ -104,15 +106,15 @@ function CreateSales(Request $req){
             }
 
 
-    
+
             // You may return a response here or perform additional actions as needed for the update of an existing subscription
         } else {
             $expireDate = $currentDate->copy()->addDays($s->SubscriptionPeriodInDays);
-    
+
             $s->ExpireDate = $expireDate;
-           
+
             $saver = $s->save();
-    
+
             if($saver){
                 $message = $s->CustomerName."  made a payment of ".$s->Amount." for ".$s->ProductName;
                 $this->audit->Auditor($req->AdminId, $message);
@@ -152,7 +154,7 @@ function ViewOneSale(Request $req){
     $s->CurrentDate = $currentDate;
     $s->save();
 
-    if($s->PricingType == "Fixed"){
+    if($s->PricingType == "One-time Purchase"){
         $message = $s->CustomerName."  payment transaction was viewed";
         $this->audit->Auditor($req->AdminId, $message);
         return $s;
@@ -163,24 +165,24 @@ function ViewOneSale(Request $req){
             $this->audit->Auditor($req->AdminId, $message);
             return response()->json(["message" => "Token has expired"], 400);
         }
-        
+
         return $s;
 
     }
 
-  
-  
+
+
 }
 
 function RegenerateTransactionId(Request $req){
-    $s = Sales::where('CompanyId', $req->CompanyId)->where('ProductId', $req->ProductId)->first();
+    $s = Sales::where('CustomerId', $req->CustomerId)->where('ProductId', $req->ProductId)->first();
     if($s==null){
         return response()->json(["message"=>"No Transaction Details Found"],400);
     }
 
     $s->TransactionId = $this->TokenGenerator();
-    $saver = $s->save();   
-    
+    $saver = $s->save();
+
     if($saver){
         $message = $s->CustomerName."  payment transaction ID was regenerated";
         $this->audit->Auditor($req->AdminId, $message);
@@ -195,7 +197,7 @@ function RegenerateTransactionId(Request $req){
     }
 
 
-    
+
 }
 
 
@@ -203,7 +205,7 @@ function RegenerateTransactionId(Request $req){
 
 function ConfigurePrice(Request $req){
 
-    $p =  OurPortfolioProjects::where('ProjectId',$req->ProjectId)->first();
+    $p =  OurPortfolioProjects::where('ProjectId',$req->ProductId)->first();
     if($p==null){
         return response()->json(["message"=>"Projects does not exist"],400);
     }
@@ -222,63 +224,57 @@ function ConfigurePrice(Request $req){
         $s->PricingType = $req->PricingType;
     }
 
-    $saver = $s->save();
+    $e = PriceConfiguration::where('ProductId',$req->ProductId)->first();
+    if($e){
+    $e->Picture = $p->Picture;
+    $e->ProductId = $p->ProjectId;
+    $e->ProductName = $p->ProjectName;
+
+    if($req->filled("Amount")){
+        $e->Amount = $req->Amount;
+    }
+
+    if($req->filled("PricingType")){
+        $e->PricingType = $req->PricingType;
+    }
+
+    $saver = $e->save();
     if($saver){
-        $message = $s->ProductName." price configured";
+        $message = $e->ProductName." price configured";
 
         $this->audit->Auditor($req->AdminId, $message);
-        return response()->json(["message"=>$s->ProductName." price configured successfully"],200);
+        return response()->json(["message"=>$e->ProductName." price configured successfully"],200);
     }
     else{
         return response()->json(["message"=>"Could not configure the price for this product"],400);
     }
 
 
+    }else{
+
+        $saver = $s->save();
+        if($saver){
+            $message = $s->ProductName." price configured";
+    
+            $this->audit->Auditor($req->AdminId, $message);
+            return response()->json(["message"=>$s->ProductName." price configured successfully"],200);
+        }
+        else{
+            return response()->json(["message"=>"Could not configure the price for this product"],400);
+        }
+    
+    
+
+    }
+
+
+   
 
 
 
 }
 
-function UpdatePrice(Request $req){
 
-    $p =  OurPortfolioProjects::where('ProjectId',$req->ProductId)->first();
-    if($p==null){
-        return response()->json(["message"=>"Projects does not exist"],400);
-    }
-
-    $s = PriceConfiguration::where('ProductId',$req->ProductId)->first();
-    if($s==null){
-        return response()->json(["message"=>"Products does not exist"],400);
-    }
-
-
-    $s->Picture = $p->Picture;
-    $s->ProductId = $p->ProjectId;
-    $s->ProductName = $p->ProjectName;
-
-    if($req->filled("Amount")){
-        $s->Amount = $req->Amount;
-    }
-
-    if($req->filled("PricingType")){
-        $s->PricingType = $req->PricingType;
-    }
-
-    $saver = $s->save();
-    if($saver){
-        $message = $s->ProductName." price updated";
-        $this->audit->Auditor($req->AdminId, $message);
-        return response()->json(["message"=>$s->ProductName." price updated successfully"],200);
-    }
-    else{
-        return response()->json(["message"=>"Could not update the price for this product"],400);
-    }
-
-
-
-
-
-}
 
 function GetAllPrice(Request $req){
      return PriceConfiguration::get();
@@ -298,7 +294,7 @@ function DeletePrice(Request $req){
     }
     else{
         return response()->json(["message"=>"Could not delete price"],200);
- 
+
     }
 
 }
@@ -332,7 +328,7 @@ function ViewExpenses(){
 }
 
 function CreateCalenderData(Request $req){
-    
+
 }
 
 
