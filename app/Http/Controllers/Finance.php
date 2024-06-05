@@ -71,7 +71,7 @@ function CreateSales(Request $req){
             $s->Amount = $req->Amount;
         }
 
-        
+
 
         $s->SubscriptionPeriodInDays = ceil($req->Amount / $p->Amount);
         $currentDate = Carbon::now();
@@ -179,6 +179,10 @@ function RegenerateTransactionId(Request $req){
     if($s==null){
         return response()->json(["message"=>"No Transaction Details Found"],400);
     }
+    $c = Customers::where('UserId', $req->CustomerId)->first();
+    if($c==null){
+        return response()->json(["message"=>"No Customer Details Found"],400);
+    }
 
     $s->TransactionId = $this->TokenGenerator();
     $saver = $s->save();
@@ -255,20 +259,20 @@ function ConfigurePrice(Request $req){
         $saver = $s->save();
         if($saver){
             $message = $s->ProductName." price configured";
-    
+
             $this->audit->Auditor($req->AdminId, $message);
             return response()->json(["message"=>$s->ProductName." price configured successfully"],200);
         }
         else{
             return response()->json(["message"=>"Could not configure the price for this product"],400);
         }
-    
-    
+
+
 
     }
 
 
-   
+
 
 
 

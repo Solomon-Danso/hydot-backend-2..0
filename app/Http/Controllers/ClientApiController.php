@@ -18,11 +18,11 @@ class ClientApiController extends Controller
 
         $c = new ClientApi();
 
-      
+
             $c->CompanyId = $s->UserId;
-        
+
             $c->CompanyName = $s->Name;
-        
+
             $c->CompanyEmail = $s->Email;
 
             $c->CompanyPhone = $s->Phone;
@@ -49,13 +49,13 @@ class ClientApiController extends Controller
     }
 
     function UpdateClientApiServerURL(Request $req){
-        $c = ClientApi::where("id", $req->id) ->where("CompanyId",$req->CompanyId) ->first();
+        $c = ClientApi::where("CompanyId",$req->CompanyId) -> where("id", $req->Id)->first();
 
         if($c==null){
             return response()->json(["message"=>"ApiServerURL for this company not found"],400);
         }
 
-       
+
 
         if($req->filled("ApiServerURL")){
             $c->ApiServerURL = $req->ApiServerURL;
@@ -66,17 +66,17 @@ class ClientApiController extends Controller
 
         $saver= $c->save();
         if($saver){
-            return response()->json(["message"=>"Api Created Successfully"], 200);
+            return response()->json(["message"=>"Api Updated Successfully"], 200);
         }
         else{
-            return response()->json(["message"=>"Api Creation Failed"], 400);
+            return response()->json(["message"=>"Api Update Failed"], 400);
         }
 
     }
 
 
     function ViewClientApiServerURL(Request $req){
-        $c = ClientApi::where("id", $req->id) ->where("CompanyId",$req->CompanyId) ->first();
+        $c = ClientApi::where("id", $req->Id) ->where("CompanyId",$req->CompanyId) ->first();
 
         if($c==null){
             return response()->json(["message"=>"ApiServerURL for this company not found"],400);
@@ -86,7 +86,7 @@ class ClientApiController extends Controller
     }
 
     function DeleteClientApiServerURL(Request $req){
-        $c = ClientApi::where("id", $req->id) ->where("CompanyId",$req->CompanyId) ->first();
+        $c = ClientApi::where("id", $req->Id) ->where("CompanyId",$req->CompanyId) ->first();
 
         if($c==null){
             return response()->json(["message"=>"ApiServerURL for this company not found"],400);
