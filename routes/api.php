@@ -10,6 +10,7 @@ use App\Http\Controllers\Websites;
 use App\Http\Controllers\Finance;
 use App\Http\Controllers\ClientApiController;
 use App\Http\Controllers\APPS;
+use App\Http\Controllers\DashBoard;
 
 
 // Route for setting up the admin, accessible without authentication
@@ -114,6 +115,10 @@ Route::post('CreateSchedular', [APPS::class, 'CreateSchedular']);
 Route::post('UpdateSchedular', [APPS::class, 'UpdateSchedular']);
 Route::post('DeleteSchedule', [APPS::class, 'DeleteSchedule']);
 Route::post('GetSchedule', [APPS::class, 'GetSchedule']);
+
+Route::post('ViewTotalSales', [DashBoard::class, 'ViewTotalSales']);
+Route::post('ViewTotalExpenses', [DashBoard::class, 'ViewTotalExpenses']);
+
 
 
 
