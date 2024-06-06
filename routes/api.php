@@ -121,6 +121,10 @@ Route::post('ViewTotalExpenses', [DashBoard::class, 'ViewTotalExpenses']);
 Route::post('ViewTotalYearlySales', [DashBoard::class, 'ViewTotalYearlySales']);
 Route::post('ViewMonthlySalesAndExpenses', [DashBoard::class, 'ViewMonthlySalesAndExpenses']);
 Route::post('ViewTotalSalesForCurrentMonth', [DashBoard::class, 'ViewTotalSalesForCurrentMonth']);
+Route::post('ThisYearSales', [DashBoard::class, 'ThisYearSales']);
+
+
+
 
 
 

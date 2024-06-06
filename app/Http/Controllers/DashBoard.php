@@ -150,4 +150,13 @@ class DashBoard extends Controller
 
 
 
+function ThisYearSales() {
+    $currentYear = Carbon::now()->year;
+    $currentYearSales = Sales::whereYear('updated_at', $currentYear)->sum('Amount');
+    
+    return response()->json(['thisYearSales' => $currentYearSales ]);
+}
+
+
+
 }
