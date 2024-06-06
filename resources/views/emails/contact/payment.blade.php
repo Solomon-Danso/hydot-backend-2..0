@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Payment Invoice - Hydot Tech</title>
+    <title>Payment Invoice - {{ config('app.name') }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -50,18 +50,25 @@
             margin-top: 10px;
         }
     </style>
+
 </head>
 <body>
+    <?php
+    if (!function_exists('customDateFormat')) {
+        function customDateFormat($dateString) {
+            return date('F d \a\t Y \a\t H:i', strtotime($dateString));
+        }
+    }
+    ?>
+
     <div class="container">
         <div class="header">{{ config('app.name') }}!</div>
 
         <div class="summary">
-            
-                <p>Date: {{ $Sales->StartDate }}</p>
-                <p>Payment Mode: {{ $Sales->PaymentMethod }}</p>
-                <p>TransactionId: {{ $Sales->TransactionId }}</p>
-                <p>Payment Reference: {{ $Sales->PaymentReference }}</p>
-           
+            <p>Date: {{ customDateFormat($Sales->StartDate) }}</p>
+            <p>Payment Mode: {{ $Sales->PaymentMethod }}</p>
+            <p>TransactionId: {{ $Sales->TransactionId }}</p>
+            <p>Payment Reference: {{ $Sales->PaymentReference }}</p>
         </div>
 
         <div class="summary">
@@ -69,8 +76,8 @@
             <p>Customer Name: <b>{{ $Sales->CustomerName }}</b></p>
             <p>Product Id: <b>{{ $Sales->ProductId }}</b></p>
             <p>Product Name: <b>{{ $Sales->ProductName }}</b></p>
-            <p>Start Date: <b>{{ $Sales->StartDate }}</b></p>
-            <p>Expire Date: <b>{{ $Sales->ExpireDate }}</b></p>
+            <p>Start Date: <b>{{ customDateFormat($Sales->StartDate) }}</b></p>
+            <p>Expire Date: <b>{{ customDateFormat($Sales->ExpireDate) }}</b></p>
         </div>
 
         <div class="summary">

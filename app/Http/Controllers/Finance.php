@@ -93,8 +93,8 @@ class Finance extends Controller
         $s->PricingType = $p->PricingType;
         $s->Amount = $req->Amount;
         $s->SubscriptionPeriodInDays = $newSubscriptionDays;
-        $s->StartDate = $currentDate;
-        $s->SystemDate = $currentDate;
+        $s->StartDate = Carbon::now();
+        $s->SystemDate = Carbon::now();
         $s->ExpireDate = $expireDate;
     
         if ($req->filled('PaymentMethod')) {
