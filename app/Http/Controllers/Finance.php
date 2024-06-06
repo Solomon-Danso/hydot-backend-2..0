@@ -13,7 +13,7 @@ use App\Models\Customers;
 use Carbon\Carbon;
 use App\Models\Expenses;
 use App\Mail\PaymentInvoice;
-
+use Illuminate\Support\Facades\Log;
 
 
 class Finance extends Controller
@@ -28,28 +28,58 @@ class Finance extends Controller
 
     }
 
-function CreateSales(Request $req){
 
+
+    function CreateSales(Request $req) {
         $a = AdminUser::where('UserId', $req->AdminId)->first();
         $c = Customers::where('UserId', $req->CustomerId)->first();
         $p = PriceConfiguration::where('ProductId', $req->ProductId)->first();
-
-        if ($a==null) {
+    
+        if ($a == null) {
             return response()->json(['message' => 'Admin not found'], 400);
         }
-
-        if ($c==null) {
+    
+        if ($c == null) {
             return response()->json(['message' => 'Customer not found'], 400);
         }
-
-        if ($p==null) {
+    
+        if ($p == null) {
             return response()->json(['message' => 'Product not found'], 400);
         }
+    
+        $currentDate = Carbon::now();
+        $newSubscriptionDays = ceil($req->Amount / $p->Amount);
+    
+        $existingToken = Sales::where('CustomerId', $c->UserId)
+                      ->where('ProductId', $p->ProductId)
+                      ->orderBy('created_at', 'desc')
+                      ->first();
 
+    
+        if ($existingToken) {
+           // return response()->json(['message' => 'Token Exist'], 400);
+            Log::info('Existing token found:');
+            Log::info($existingToken);
+    
+            $existingExpireDate = Carbon::parse($existingToken->ExpireDate);
+            Log::info('existingExpireDate:');
+            Log::info($existingExpireDate);
+
+            $existingRemainingDays = $existingExpireDate->diffInDays($currentDate);
+            Log::info('Existing RemainDays:');
+            Log::info($existingRemainingDays);
+
+            Log::info('newSubscriptionDays');
+            Log::info($newSubscriptionDays);
+            
+            $existingExpireDate->addDays($existingRemainingDays+$newSubscriptionDays); // Extend expiry date by 500 days
+            $expireDate = $existingExpireDate;
+        } else {
+            $expireDate = $currentDate->copy()->addDays($newSubscriptionDays);
+        }
+    
+        // Create a new sales record
         $s = new Sales();
-
-
-
         $s->Created_By_Id = $req->AdminId;
         $s->Created_By_Name = $a->Name;
         $s->TransactionId = $this->TokenGenerator();
@@ -58,82 +88,37 @@ function CreateSales(Request $req){
         $s->CustomerId = $c->UserId;
         $s->CustomerName = $c->Name;
         $s->PricingType = $p->PricingType;
-
-        if($req->filled("PaymentMethod")){
-            $s->PaymentMethod = $req->PaymentMethod;
-        }
-
-        if($req->filled("PaymentReference")){
-            $s->PaymentReference = $req->PaymentReference;
-        }
-
-        if($req->filled("Amount")){
-            $s->Amount = $req->Amount;
-        }
-
-
-
-        $s->SubscriptionPeriodInDays = ceil($req->Amount / $p->Amount);
-        $currentDate = Carbon::now();
-
+        $s->Amount = $req->Amount;
+        $s->SubscriptionPeriodInDays = $newSubscriptionDays;
         $s->StartDate = $currentDate;
         $s->SystemDate = $currentDate;
-
-        $existingToken = Sales::where('CustomerId', $c->UserId)->where('ProductId', $p->ProductId)->first();
-
-        if($existingToken){
-            // Add the new subscription days to the remaining days of the existing subscription
-            $existingExpireDate = Carbon::parse($existingToken->ExpireDate);
-            $existingRemainingDays = $existingExpireDate->diffInDays($currentDate);
-
-            $extendedExpireDate = $currentDate->copy()->addDays($s->SubscriptionPeriodInDays + $existingRemainingDays);
-            $existingToken->ExpireDate = $extendedExpireDate;
-            $saver=$existingToken->save();
-
-            if($saver){
-
-                $message = $s->CustomerName."  made a payment of ".$s->Amount." for ".$s->ProductName;
-                $this->audit->Auditor($req->AdminId, $message);
-
-                try {
-                    Mail::to($c->Email)->send(new PaymentInvoice($existingToken));
-                    return response()->json(["message" => $message], 200);
-                } catch (\Exception $e) {
-                    return response()->json(["message" => "Email Failed To Send"], 400);
-                }
-            } else {
-                return response()->json(["Request" => "Failed"], 400);
-            }
-
-
-
-            // You may return a response here or perform additional actions as needed for the update of an existing subscription
-        } else {
-            $expireDate = $currentDate->copy()->addDays($s->SubscriptionPeriodInDays);
-
-            $s->ExpireDate = $expireDate;
-
-            $saver = $s->save();
-
-            if($saver){
-                $message = $s->CustomerName."  made a payment of ".$s->Amount." for ".$s->ProductName;
-                $this->audit->Auditor($req->AdminId, $message);
-                try {
-                    Mail::to($c->Email)->send(new PaymentInvoice($s));
-                    return response()->json(["message" => "Payment made Successfully"], 200);
-                } catch (\Exception $e) {
-                    return response()->json(["message" => "Email Failed To Send"], 400);
-                }
-            } else {
-                return response()->json(["Request" => "Failed"], 400);
-            }
+        $s->ExpireDate = $expireDate;
+    
+        if ($req->filled('PaymentMethod')) {
+            $s->PaymentMethod = $req->PaymentMethod;
         }
-
-
-
-
-}
-
+    
+        if ($req->filled('PaymentReference')) {
+            $s->PaymentReference = $req->PaymentReference;
+        }
+    
+        $saver = $s->save();
+    
+        if ($saver) {
+            $message = $c->Name . " made a payment of " . $req->Amount . " for " . $p->ProductName;
+            $this->audit->Auditor($req->AdminId, $message);
+            try {
+                Mail::to($c->Email)->send(new PaymentInvoice($s));
+                return response()->json(["message" => "Payment made Successfully"], 200);
+            } catch (\Exception $e) {
+                return response()->json(["message" => "Email Failed To Send"], 400);
+            }
+        } else {
+            return response()->json(["Request" => "Failed"], 400);
+        }
+    }
+    
+    
 
 
 

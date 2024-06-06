@@ -118,7 +118,9 @@ Route::post('GetSchedule', [APPS::class, 'GetSchedule']);
 
 Route::post('ViewTotalSales', [DashBoard::class, 'ViewTotalSales']);
 Route::post('ViewTotalExpenses', [DashBoard::class, 'ViewTotalExpenses']);
-
+Route::post('ViewTotalYearlySales', [DashBoard::class, 'ViewTotalYearlySales']);
+Route::post('ViewMonthlySalesAndExpenses', [DashBoard::class, 'ViewMonthlySalesAndExpenses']);
+Route::post('ViewTotalSalesForCurrentMonth', [DashBoard::class, 'ViewTotalSalesForCurrentMonth']);
 
 
 
