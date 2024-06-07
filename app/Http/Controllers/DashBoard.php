@@ -7,6 +7,10 @@ use App\Models\Sales;
 use App\Models\Expenses;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Models\Customers;
+use App\Models\OurPortfolioProjects;
+use App\Models\AuditTrial;
+use Illuminate\Support\Facades\Log;
 
 class DashBoard extends Controller
 {
@@ -25,7 +29,9 @@ class DashBoard extends Controller
     function ViewTotalYearlySales() {
         $currentYear = Carbon::now()->year;
         $salesData = [];
+        $totalSalesOver5Years = 0;
 
+        // Step 1: Calculate total sales for each year and the total sales over 5 years
         for ($i = 0; $i < 5; $i++) {
             $year = $currentYear - $i;
             $totalSales = Sales::whereYear('updated_at', $year)->sum('Amount');
@@ -33,10 +39,17 @@ class DashBoard extends Controller
                 'year' => $year,
                 'amount' => $totalSales
             ];
+            $totalSalesOver5Years += $totalSales;
+        }
+
+        // Step 2: Calculate the percentage for each year's sales
+        foreach ($salesData as &$data) {
+            $data['percentage'] = $totalSalesOver5Years > 0 ? ($data['amount'] / $totalSalesOver5Years) * 100 : 0;
         }
 
         return response()->json(['sales' => $salesData]);
     }
+
 
     function ViewMonthlySalesAndExpenses() {
         $currentYear = Carbon::now()->year;
@@ -153,9 +166,360 @@ class DashBoard extends Controller
 function ThisYearSales() {
     $currentYear = Carbon::now()->year;
     $currentYearSales = Sales::whereYear('updated_at', $currentYear)->sum('Amount');
-    
+
     return response()->json(['thisYearSales' => $currentYearSales ]);
 }
+
+function TotalCustomers(){
+    $c = Customers::Count();
+    return response()->json(["customers"=>$c],200);
+}
+
+function EarningData() {
+    $currentYear = Carbon::now()->year;
+    $previousYear = $currentYear - 1;
+
+    // 1. Count total customers from Customers table
+    $totalCustomersCurrentYear = Customers::whereYear('created_at', $currentYear)->count();
+    $totalCustomersPreviousYear = Customers::whereYear('created_at', $previousYear)->count();
+
+    // 2. Count total products from OurPortfolioProjects table
+    $totalProductsCurrentYear = OurPortfolioProjects::whereYear('created_at', $currentYear)->count();
+    $totalProductsPreviousYear = OurPortfolioProjects::whereYear('created_at', $previousYear)->count();
+
+    // 3. Sum current year sales
+    $currentYearSales = Sales::whereYear('updated_at', $currentYear)->sum('Amount');
+
+    // 4. Sum current year expenses
+    $currentYearExpenses = Expenses::whereYear('updated_at', $currentYear)->sum('Amount');
+
+    // Calculate the sales and expenses for the previous year to determine the percentage change
+    $previousYearSales = Sales::whereYear('updated_at', $previousYear)->sum('Amount');
+    $previousYearExpenses = Expenses::whereYear('updated_at', $previousYear)->sum('Amount');
+
+    // Calculate percentage changes
+    $customersPercentageChange = $totalCustomersPreviousYear > 0 ? (($totalCustomersCurrentYear - $totalCustomersPreviousYear) / $totalCustomersPreviousYear) * 100 : 100;
+    $productsPercentageChange = $totalProductsPreviousYear > 0 ? (($totalProductsCurrentYear - $totalProductsPreviousYear) / $totalProductsPreviousYear) * 100 : 100;
+    $salesPercentageChange = $previousYearSales > 0 ? (($currentYearSales - $previousYearSales) / $previousYearSales) * 100 : 100;
+    $expensesPercentageChange = $previousYearExpenses > 0 ? (($currentYearExpenses - $previousYearExpenses) / $previousYearExpenses) * 100 : 100;
+
+    // Determine increase or decrease
+    $customersPercentage = ($customersPercentageChange >= 0 ? '+' : '') . number_format($customersPercentageChange, 2) . '%';
+    $customersColor = $customersPercentageChange >= 0 ? 'green-600' : 'red-600';
+
+    $productsPercentage = ($productsPercentageChange >= 0 ? '+' : '') . number_format($productsPercentageChange, 2) . '%';
+    $productsColor = $productsPercentageChange >= 0 ? 'green-600' : 'red-600';
+
+    $salesPercentage = ($salesPercentageChange >= 0 ? '+' : '') . number_format($salesPercentageChange, 2) . '%';
+    $salesColor = $salesPercentageChange >= 0 ? 'green-600' : 'red-600';
+
+    $expensesPercentage = ($expensesPercentageChange >= 0 ? '+' : '') . number_format($expensesPercentageChange, 2) . '%';
+    $expensesColor = $expensesPercentageChange >= 0 ? 'red-600' : 'green-600';
+
+    // Formatting amounts
+    $formattedCurrentYearSales = number_format($currentYearSales, 2);
+    $formattedCurrentYearExpenses = number_format($currentYearExpenses, 2);
+
+    $earningData = [
+        [
+            'icon' => 'MdOutlineSupervisorAccount',
+            'amount' => number_format($totalCustomersCurrentYear),
+            'percentage' => $customersPercentage,
+            'title' => 'Customers',
+            'iconColor' => '#03C9D7',
+            'iconBg' => '#E5FAFB',
+            'pcColor' => $customersColor,
+        ],
+        [
+            'icon' => 'BsBoxSeam',
+            'amount' => number_format($totalProductsCurrentYear),
+            'percentage' => $productsPercentage,
+            'title' => 'Products',
+            'iconColor' => 'rgb(255, 244, 229)',
+            'iconBg' => 'rgb(254, 201, 15)',
+            'pcColor' => $productsColor,
+        ],
+        [
+            'icon' => 'FiBarChart',
+            'amount' => '₵' . $formattedCurrentYearSales,
+            'percentage' => $salesPercentage,
+            'title' => 'Sales',
+            'iconColor' => 'rgb(228, 106, 118)',
+            'iconBg' => 'rgb(255, 244, 229)',
+            'pcColor' => $salesColor,
+        ],
+        [
+            'icon' => 'HiOutlineRefresh',
+            'amount' => '₵' . $formattedCurrentYearExpenses,
+            'percentage' => $expensesPercentage,
+            'title' => 'Expenses',
+            'iconColor' => 'rgb(0, 194, 146)',
+            'iconBg' => 'rgb(235, 250, 242)',
+            'pcColor' => $expensesColor,
+        ],
+    ];
+
+    return response()->json(['earningData' => $earningData]);
+}
+
+
+
+function RecentTransaction() {
+    // Fetch recent sales data
+    $salesData = Sales::select('updated_at as date', 'Amount as amount', 'PaymentReference as title')
+        ->orderBy('updated_at', 'desc')
+        ->limit(5)
+        ->get()
+        ->toArray();
+
+    // Fetch recent expenses data
+    $expensesData = Expenses::select('updated_at as date', 'Amount as amount')
+        ->orderBy('updated_at', 'desc')
+        ->limit(5)
+        ->get()
+        ->toArray();
+
+    // Combine and sort data
+    $combinedData = array_merge(
+        array_map(function ($item) {
+            return [
+                'date' => $item['date'],
+                'amount' => $item['amount'],
+                'title' => $item['title'],
+                'desc' => 'Money Added',
+                'type' => 'sales'
+            ];
+        }, $salesData),
+        array_map(function ($item) {
+            return [
+                'date' => $item['date'],
+                'amount' => $item['amount'],
+                'title' => 'Expenses',
+                'desc' => 'Bill Payment',
+                'type' => 'expenses'
+            ];
+        }, $expensesData)
+    );
+
+    // Sort combined data by date
+    usort($combinedData, function ($a, $b) {
+        return strtotime($b['date']) - strtotime($a['date']);
+    });
+
+    // Pick the five most recent transactions
+    $recentTransactions = array_slice($combinedData, 0, 5);
+
+    // Format the data as required
+    $formattedTransactions = array_map(function ($item) {
+        $isPositive = $item['type'] === 'sales';
+        return [
+            'icon' => $isPositive ? 'BsCurrencyDollar' : 'BsShield',
+            'amount' => ($isPositive ? '+' : '-') . '₵' . number_format($item['amount'], 2),
+            'title' => $item['title'],
+            'desc' => $item['desc'],
+            'iconColor' => $isPositive ? '#03C9D7' : 'rgb(0, 194, 146)',
+            'iconBg' => $isPositive ? '#E5FAFB' : 'rgb(235, 250, 242)',
+            'pcColor' => $isPositive ? 'green-600' : 'red-600',
+        ];
+    }, $recentTransactions);
+
+    return response()->json(['recentTransactions' => $formattedTransactions]);
+}
+
+function YearlyContinent() {
+    // Fetch yearly sales data
+    $yearlySales = Sales::selectRaw('DATEPART(YEAR, updated_at) as year, SUM(Amount) as total_sales')
+        ->groupByRaw('DATEPART(YEAR, updated_at)')
+        ->orderByRaw('DATEPART(YEAR, updated_at) ASC')
+        ->get()
+        ->toArray();
+
+    Log::info("Main Yearly Sales");
+    Log::info($yearlySales);
+
+    $salesByContinent = [];
+
+    // Iterate over yearly sales data
+    foreach ($yearlySales as $yearlySale) {
+        $year = $yearlySale['year'];
+        $totalSales = intval($yearlySale['total_sales']); // Cast to integer
+
+        // Fetch sales records for the current year
+        $salesData = Sales::whereYear('updated_at', $year)->get();
+
+        // Iterate over sales records to retrieve continent information
+        foreach ($salesData as $sale) {
+            // Find the customer associated with the sale
+            $customer = Customers::where("UserId", $sale->CustomerId)->first();
+
+            // If customer found, extract continent information
+            if ($customer) {
+                $continent = $customer->Continent;
+
+                // Aggregate sales by continent for the current year
+                if (!isset($salesByContinent[$continent])) {
+                    $salesByContinent[$continent] = [];
+                }
+
+                // Store total sales for the current year and continent
+                $salesByContinent[$continent][] = ['x' => mktime(0, 0, 0, 1, 1, $year), 'y' => $totalSales];
+            }
+        }
+    }
+
+    // Format the data as required
+    $formattedData = [];
+
+    foreach ($salesByContinent as $continent => $sales) {
+        $formattedData[] = [
+            'dataSource' => $sales, // Use sales data directly
+            'xName' => 'x',
+            'yName' => 'y',
+            'name' => $continent,
+            'width' => '2',
+            'marker' => ['visible' => true, 'width' => 10, 'height' => 10],
+            'type' => 'Line'
+        ];
+    }
+
+    return response()->json($formattedData);
+}
+
+function WeeklyStats() {
+    // Calculate the start and end of the current week (Monday to Sunday)
+    $startOfWeek = Carbon::now()->startOfWeek()->format('Y-m-d');
+    $endOfWeek = Carbon::now()->endOfWeek()->format('Y-m-d');
+
+    // Query for the top seller (product with the highest sales revenue)
+    $topSeller = Sales::select('ProductId', DB::raw('SUM(amount) AS total_sales'))
+        ->whereBetween('updated_at', [$startOfWeek, $endOfWeek])
+        ->groupBy('ProductId')
+        ->orderByDesc('total_sales')
+        ->first();
+
+    // Query for the most viewed product
+    $mostViewed = Sales::select('ProductId', DB::raw('COUNT(ProductId) AS total_views'))
+        ->whereBetween('updated_at', [$startOfWeek, $endOfWeek])
+        ->groupBy('ProductId')
+        ->orderByDesc('total_views')
+        ->first();
+
+    // Query for the top engaged product (both high sales revenue and high number of views)
+    $topEngaged = Sales::select('ProductId', DB::raw('SUM(amount) AS total_sales, COUNT(ProductId) AS total_views'))
+        ->whereBetween('updated_at', [$startOfWeek, $endOfWeek])
+        ->groupBy('ProductId')
+        ->orderByDesc('total_sales')
+        ->orderByDesc('total_views')
+        ->first();
+
+    // Format the data
+    $weeklyStats = [
+        [
+            'icon' => 'FiShoppingCart', // Add appropriate icon
+            'amount' => $topSeller ? number_format($topSeller->total_sales) : 'N/A',
+            'title' => 'Top Seller',
+            'desc' => 'Highest Revenue Product',
+            'iconBg' => '#FB9678', // Add appropriate background color
+            'pcColor' => 'green-600', // Add appropriate color
+        ],
+        [
+            'icon' => 'GiSunkenEye', // Add appropriate icon
+            'amount' => $mostViewed ? number_format($mostViewed->total_views) : 'N/A',
+            'title' => 'Most Viewed',
+            'desc' => 'Most Viewed Product',
+            'iconBg' => 'rgb(254, 201, 15)', // Add appropriate background color
+            'pcColor' => 'green-600', // Add appropriate color
+        ],
+        [
+            'icon' => 'BsChatLeft', // Add appropriate icon
+            'amount' => $topEngaged ? number_format($topEngaged->total_views) : 'N/A',
+            'title' => 'Top Engaged',
+            'desc' => 'Most Engaging Product',
+            'iconBg' => '#00C292', // Add appropriate background color
+            'pcColor' => 'green-600', // Add appropriate color
+        ],
+    ];
+
+    return response()->json(['weeklyStats' => $weeklyStats]);
+}
+
+function TopCustomers() {
+    // Query to fetch the top 3 customers with the highest amount paid in the Sales table
+    $topCustomers = Sales::select('CustomerId', DB::raw('SUM(amount) AS total_amount'))
+        ->groupBy('CustomerId')
+        ->orderByDesc('total_amount')
+        ->limit(5)
+        ->get();
+
+    // Initialize an array to store the portfolio stats data
+    $portfolioStats = [];
+
+    // Loop through the top customers
+    foreach ($topCustomers as $customer) {
+        // Fetch customer details from the Customer table based on CustomerId
+        $customerDetails = Customers::select('UserId', 'Name', 'Picture')
+            ->where('UserId', $customer->CustomerId)
+            ->first();
+
+        // Check if customer details are found
+        if ($customerDetails) {
+            // Push customer details to the portfolio stats array
+            $portfolioStats[] = [
+                'img' => $customerDetails->Picture, // Assuming Picture is the column name for the customer's image
+                'amount' => number_format($customer->total_amount, 2), // Format amount
+                'title' => $customerDetails->Name, // Assuming Name is the column name for the customer's name
+                'pcColor' => 'green-600', // Add appropriate color
+            ];
+        }
+    }
+
+    // Return portfolio stats data
+    return response()->json(['topCustomers' => $portfolioStats]);
+}
+
+function TopTrendingPortfolio() {
+    // Query to fetch the top 5 customers with the highest amount paid in the Sales table
+    $topCustomers = Sales::select('ProductId', DB::raw('SUM(amount) AS total_amount'))
+        ->groupBy('ProductId')
+        ->orderByDesc('total_amount')
+        ->limit(5)
+        ->get();
+
+    // Initialize an array to store the portfolio stats data
+    $portfolioStats = [];
+
+    // Loop through the top customers
+    foreach ($topCustomers as $customer) {
+        // Fetch project details from the OurPortfolioProjects table based on ProductId
+        $projectDetails = OurPortfolioProjects::select('ProjectId', 'Picture', 'ProjectName')
+            ->where('ProjectId', $customer->ProductId)
+            ->first();
+
+        // Check if project details are found
+        if ($projectDetails) {
+            // Push project details to the portfolio stats array
+            $portfolioStats[] = [
+                'img' => $projectDetails->Picture, // Assuming Picture is the column name for the project's image
+                'amount' => number_format($customer->total_amount, 2), // Format amount
+                'title' => $projectDetails->ProjectName, // Assuming ProjectName is the column name for the project's name
+                'pcColor' => 'green-600', // Add appropriate color
+            ];
+        }
+    }
+
+    // Return portfolio stats data
+    return response()->json(['PortfolioStats' => $portfolioStats]);
+}
+
+function Auditing() {
+    // Query to fetch audit trial records ordered by created_at in descending order
+    $auditTrials = AuditTrial::orderByDesc('created_at')->get();
+
+    // Return the audit trial records
+    return response()->json(['auditTrials' => $auditTrials]);
+}
+
+
 
 
 

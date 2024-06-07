@@ -122,8 +122,14 @@ Route::post('ViewTotalYearlySales', [DashBoard::class, 'ViewTotalYearlySales']);
 Route::post('ViewMonthlySalesAndExpenses', [DashBoard::class, 'ViewMonthlySalesAndExpenses']);
 Route::post('ViewTotalSalesForCurrentMonth', [DashBoard::class, 'ViewTotalSalesForCurrentMonth']);
 Route::post('ThisYearSales', [DashBoard::class, 'ThisYearSales']);
-
-
+Route::post('TotalCustomers', [DashBoard::class, 'TotalCustomers']);
+Route::post('EarningData', [DashBoard::class, 'EarningData']);
+Route::post('RecentTransaction', [DashBoard::class, 'RecentTransaction']);
+Route::post('YearlyContinent', [DashBoard::class, 'YearlyContinent']);
+Route::post('WeeklyStats', [DashBoard::class, 'WeeklyStats']);
+Route::post('TopCustomers', [DashBoard::class, 'TopCustomers']);
+Route::post('TopTrendingPortfolio', [DashBoard::class, 'TopTrendingPortfolio']);
+Route::post('Auditing', [DashBoard::class, 'Auditing']);
 
 
 
