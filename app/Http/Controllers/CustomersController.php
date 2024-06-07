@@ -185,7 +185,7 @@ function UpdateCustomers(Request $req){
     }
 
 
-    $this->audit->Auditor($req->AdminId, "Viewed All Employeeistrators");
+    $this->audit->Auditor($req->AdminId, "Viewed All Customers");
 
 
     return response()->json($s);
