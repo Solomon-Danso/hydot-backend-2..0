@@ -11,6 +11,7 @@ use App\Models\Customers;
 use App\Models\OurPortfolioProjects;
 use App\Models\AuditTrial;
 use Illuminate\Support\Facades\Log;
+use App\Models\Visitors;
 
 class DashBoard extends Controller
 {
@@ -519,7 +520,89 @@ function Auditing() {
     return response()->json(['auditTrials' => $auditTrials]);
 }
 
+function GetVisitors(){
+    $v = Visitors::get();
+    return response()->json(["visitors"=>$v],200);
+}
 
+function CountVisitors(){
+    $v = Visitors::Count();
+    return response()->json(["visitors"=>$v],200);
+}
+
+function CountCountryVisitors() {
+    // Get today's and yesterday's date
+    $today = Carbon::today()->toDateString();
+    $yesterday = Carbon::yesterday()->toDateString();
+
+    // Get the same day last year
+    $lastYearToday = Carbon::today()->subYear()->toDateString();
+
+    // Count today's visitors
+    $todayVisitorsCount = DB::table('visitors')
+        ->whereDate('created_at', $today)
+        ->count();
+
+    // Count yesterday's visitors
+    $yesterdayVisitorsCount = DB::table('visitors')
+        ->whereDate('created_at', $yesterday)
+        ->count();
+
+    // Calculate the percentage change for today's visitors
+    if ($yesterdayVisitorsCount > 0) {
+        $visitorPercentageChange = (($todayVisitorsCount - $yesterdayVisitorsCount) / $yesterdayVisitorsCount) * 100;
+    } else {
+        $visitorPercentageChange = $todayVisitorsCount > 0 ? 100 : 0;
+    }
+
+    // Format percentage change for today's visitors
+    $visitorPercentageChangeFormatted = ($visitorPercentageChange >= 0 ? '+' : '') . number_format($visitorPercentageChange, 2) . '%';
+
+    // Count distinct active countries with visitors today
+    $activeCountriesCountToday = DB::table('visitors')
+        ->whereDate('created_at', $today)
+        ->distinct('country')
+        ->count('country');
+
+    // Count distinct active countries with visitors on the same day last year
+    $activeCountriesCountLastYear = DB::table('visitors')
+        ->whereDate('created_at', $lastYearToday)
+        ->distinct('country')
+        ->count('country');
+
+    // Calculate the percentage change for active countries
+    if ($activeCountriesCountLastYear > 0) {
+        $countriesPercentageChange = (($activeCountriesCountToday - $activeCountriesCountLastYear) / $activeCountriesCountLastYear) * 100;
+    } else {
+        $countriesPercentageChange = $activeCountriesCountToday > 0 ? 100 : 0;
+    }
+
+    // Format percentage change for active countries
+    $countriesPercentageChangeFormatted = ($countriesPercentageChange >= 0 ? '+' : '') . number_format($countriesPercentageChange, 2) . '%';
+
+    $data = [
+        [
+            'icon' => '<FaPeoplePulling />',
+            'amount' => strval($todayVisitorsCount),
+            'percentage' => $visitorPercentageChangeFormatted,
+            'title' => 'Today Visitors',
+            'iconColor' => '#03C9D7',
+            'iconBg' => '#E5FAFB',
+            'pcColor' => $visitorPercentageChange >= 0 ? 'green-600' : 'red-600',
+        ],
+        [
+            'icon' => '<FcGlobe />',
+            'amount' => strval($activeCountriesCountToday),
+            'percentage' => $countriesPercentageChangeFormatted,
+            'title' => 'Active Countries',
+            'iconColor' => 'rgb(255, 244, 229)',
+            'iconBg' => 'rgb(254, 201, 15)',
+            'pcColor' => $countriesPercentageChange >= 0 ? 'green-600' : 'red-600',
+        ]
+    ];
+
+    return response()->json($data, 200);
+}
 
 
 

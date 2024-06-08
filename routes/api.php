@@ -11,6 +11,7 @@ use App\Http\Controllers\Finance;
 use App\Http\Controllers\ClientApiController;
 use App\Http\Controllers\APPS;
 use App\Http\Controllers\DashBoard;
+use App\Http\Controllers\AuditTrialController;
 
 
 // Route for setting up the admin, accessible without authentication
@@ -20,7 +21,7 @@ Route::post('VerifyToken', [AuthenticationController::class, 'VerifyToken']);
 
 Route::post('ForgetPasswordStep1', [AuthenticationController::class, 'ForgetPasswordStep1']);
 Route::post('ForgetPasswordStep2', [AuthenticationController::class, 'ForgetPasswordStep2']);
-
+Route::post('Visitors', [AuditTrialController::class, 'Visitors']);
 Route::post('UnLocker', [AdminUserController::class, 'UnLocker']);
 
 
@@ -115,6 +116,11 @@ Route::post('CreateSchedular', [APPS::class, 'CreateSchedular']);
 Route::post('UpdateSchedular', [APPS::class, 'UpdateSchedular']);
 Route::post('DeleteSchedule', [APPS::class, 'DeleteSchedule']);
 Route::post('GetSchedule', [APPS::class, 'GetSchedule']);
+Route::post('SendChat', [APPS::class, 'SendChat']);
+Route::post('ReplyTheChat', [APPS::class, 'ReplyTheChat']);
+
+
+
 
 Route::post('ViewTotalSales', [DashBoard::class, 'ViewTotalSales']);
 Route::post('ViewTotalExpenses', [DashBoard::class, 'ViewTotalExpenses']);
@@ -130,6 +136,9 @@ Route::post('WeeklyStats', [DashBoard::class, 'WeeklyStats']);
 Route::post('TopCustomers', [DashBoard::class, 'TopCustomers']);
 Route::post('TopTrendingPortfolio', [DashBoard::class, 'TopTrendingPortfolio']);
 Route::post('Auditing', [DashBoard::class, 'Auditing']);
+Route::post('GetVisitors', [DashBoard::class, 'GetVisitors']);
+Route::post('CountVisitors', [DashBoard::class, 'CountVisitors']);
+Route::post('CountCountryVisitors', [DashBoard::class, 'CountCountryVisitors']);
 
 
 

@@ -4,8 +4,15 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Scheduler;
+use App\Models\Chat;
+use App\Models\ReplyChat;
 use App\Http\Controllers\AuditTrialController;
 use Carbon\Carbon;
+use App\Mail\Support;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 
 class APPS extends Controller
 {
@@ -76,13 +83,13 @@ function UpdateSchedular(Request $req){
         }
 
 
-$saver = $s->save();
-if($saver){
+    $saver = $s->save();
+    if($saver){
     $message = $s->Subject." schedule was updated";
     $this->audit->Auditor($req->AdminId, $message);
     return response()->json(["message"=>$s->Subject." schedule is updated"],200);
-}
-else{
+    }
+    else{
     return response()->json(["message"=>"Failed to Update Schedule"],400);
 }
 
@@ -115,8 +122,80 @@ function GetSchedule(){
 }
 
 
+function SendChat(Request $req){
+    $c = new Chat();
+    $c->EmailId = $this->audit->IdGenerator();
+
+    if($req->Purpose=="Subscriber"){
+    $c->Purpose = "Subscriber";
+    $c->FullName= $c->EmailId;
+    $c->Email = $req->Email;
+    $c->Message = $req->Email." subscribed to the newsletter";
+
+    $saver = $c->save();
+    if($saver){
+        return response()->json(["message"=>"Subscribed successfully"],200);
+    }
+    else{
+        return response()->json(["message"=>"Apologies, we were unable to subscribe you to our newsletter. Please check your internet connection and try again. "],400);
+    }
 
 
+
+    }
+    else{
+        $c->Purpose = "Enquiry";
+        $c->FullName= $req->FullName;
+        $c->Email = $req->Email;
+        $c->Message = $req->Message;
+
+        $saver = $c->save();
+    if($saver){
+        return response()->json(["message"=>"Message sent successfully"],200);
+    }
+    else{
+        return response()->json(["message"=>"Apologies, we were unable to send your message. Please check your internet connection and try again. "],400);
+    }
+
+    }
+
+}
+
+function ReplyTheChat(Request $req)
+{
+    $c = Chat::where("EmailId", $req->EmailId)->first();
+    if ($c == null) {
+        return response()->json(["message" => "Chat not found"]);
+    }
+
+    // Create a new instance of ReplyChat
+    $r = new ReplyChat();
+    $r->ReplyId = $this->audit->IdGenerator();
+    $r->Email = $c->Email;
+    $r->CustomerName = $c->FullName;
+    $r->CustomerMessage = $c->Message;
+    $r->Reply = $req->Reply;
+
+    // Store attachment if exists
+    $attachmentName = null;
+    if ($req->hasFile("Attachment")) {
+        $attachmentName = $req->file("Attachment")->store("", "public");
+    }
+
+    $saved = $r->save();
+    if ($saved) {
+        // Send email if the request is successful
+        try {
+            Mail::to($r->Email)->send(new Support($r->CustomerName, $r->Reply, $attachmentName));
+            return response()->json(["message" => "Reply sent successfully"]);
+        } catch (\Exception $e) {
+            // Return the exception message
+            return response()->json(['message' => 'Email request failed: ' . $e->getMessage()], 400);
+        }
+    } else {
+        return response()->json(['message' => 'Could not save the reply'], 500);
+    }
+}
 
 
 
