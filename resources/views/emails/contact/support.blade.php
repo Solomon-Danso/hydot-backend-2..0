@@ -56,23 +56,21 @@
         <div class="header">{{ config('app.name') }}</div>
         
         <div class="details">
-            <div><strong>Username:</strong> {{ $username }}</div>
-            <div><strong>Message:</strong> {{ $messageContent }}</div>
+            <div><strong>Dear {{ $username }},</strong></div>
+            <div>{{ $messageContent }}</div>
         </div>
 
-       
         <div class="attachments">
             @if($attachment)
                 @if(strpos($attachment, 'image') !== false)
-                    <img src="{{ asset('storage/' . $attachment) }}" />
+                    <img src="{{ asset('storage/' . $attachment) }}" alt="Attachment Image" />
                 @else
-                    <a href="{{ asset('storage/' . $attachment) }}">Download Attachment</a>
+                    <a href="{{ asset('storage/' . $attachment) }}" download>Download Attachment</a>
                 @endif
             @else
-                No attachments
+                <p>No attachments available.</p>
             @endif
         </div>
-        
 
         <div class="footer">
             &copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.

@@ -535,9 +535,6 @@ function CountCountryVisitors() {
     $today = Carbon::today()->toDateString();
     $yesterday = Carbon::yesterday()->toDateString();
 
-    // Get the same day last year
-    $lastYearToday = Carbon::today()->subYear()->toDateString();
-
     // Count today's visitors
     $todayVisitorsCount = DB::table('visitors')
         ->whereDate('created_at', $today)
@@ -555,8 +552,43 @@ function CountCountryVisitors() {
         $visitorPercentageChange = $todayVisitorsCount > 0 ? 100 : 0;
     }
 
-    // Format percentage change for today's visitors
-    $visitorPercentageChangeFormatted = ($visitorPercentageChange >= 0 ? '+' : '') . number_format($visitorPercentageChange, 2) . '%';
+    // Count today's subscriptions from chats table where Purpose is "Subscriber"
+    $todaySubscriptionsCount = DB::table('chats')
+        ->whereDate('created_at', $today)
+        ->where('purpose', 'Subscriber')
+        ->count();
+
+    // Count today's messages from chats table where Purpose is "Enquiry"
+    $todayMessagesCount = DB::table('chats')
+        ->whereDate('created_at', $today)
+        ->where('purpose', 'Enquiry')
+        ->count();
+
+    // Count yesterday's subscriptions
+    $yesterdaySubscriptionsCount = DB::table('chats')
+        ->whereDate('created_at', $yesterday)
+        ->where('purpose', 'Subscriber')
+        ->count();
+
+    // Count yesterday's messages
+    $yesterdayMessagesCount = DB::table('chats')
+        ->whereDate('created_at', $yesterday)
+        ->where('purpose', 'Enquiry')
+        ->count();
+
+    // Calculate the percentage change for subscriptions
+    if ($yesterdaySubscriptionsCount > 0) {
+        $subscriptionsPercentageChange = (($todaySubscriptionsCount - $yesterdaySubscriptionsCount) / $yesterdaySubscriptionsCount) * 100;
+    } else {
+        $subscriptionsPercentageChange = $todaySubscriptionsCount > 0 ? 100 : 0;
+    }
+
+    // Calculate the percentage change for messages
+    if ($yesterdayMessagesCount > 0) {
+        $messagesPercentageChange = (($todayMessagesCount - $yesterdayMessagesCount) / $yesterdayMessagesCount) * 100;
+    } else {
+        $messagesPercentageChange = $todayMessagesCount > 0 ? 100 : 0;
+    }
 
     // Count distinct active countries with visitors today
     $activeCountriesCountToday = DB::table('visitors')
@@ -564,40 +596,43 @@ function CountCountryVisitors() {
         ->distinct('country')
         ->count('country');
 
-    // Count distinct active countries with visitors on the same day last year
-    $activeCountriesCountLastYear = DB::table('visitors')
-        ->whereDate('created_at', $lastYearToday)
-        ->distinct('country')
-        ->count('country');
-
-    // Calculate the percentage change for active countries
-    if ($activeCountriesCountLastYear > 0) {
-        $countriesPercentageChange = (($activeCountriesCountToday - $activeCountriesCountLastYear) / $activeCountriesCountLastYear) * 100;
-    } else {
-        $countriesPercentageChange = $activeCountriesCountToday > 0 ? 100 : 0;
-    }
-
-    // Format percentage change for active countries
-    $countriesPercentageChangeFormatted = ($countriesPercentageChange >= 0 ? '+' : '') . number_format($countriesPercentageChange, 2) . '%';
-
+    // Define the data array
     $data = [
         [
-            'icon' => '<FaPeoplePulling />',
+            'icon' => 'FaPeoplePulling',
             'amount' => strval($todayVisitorsCount),
-            'percentage' => $visitorPercentageChangeFormatted,
+            'percentage' => $visitorPercentageChange >= 0 ? '+' . number_format($visitorPercentageChange, 2) . '%' : number_format($visitorPercentageChange, 2) . '%',
             'title' => 'Today Visitors',
             'iconColor' => '#03C9D7',
             'iconBg' => '#E5FAFB',
             'pcColor' => $visitorPercentageChange >= 0 ? 'green-600' : 'red-600',
         ],
         [
-            'icon' => '<FcGlobe />',
+            'icon' => 'FcGlobe',
             'amount' => strval($activeCountriesCountToday),
-            'percentage' => $countriesPercentageChangeFormatted,
+            'percentage' => '', // Percentage not provided in the sample data for Active Countries
             'title' => 'Active Countries',
             'iconColor' => 'rgb(255, 244, 229)',
             'iconBg' => 'rgb(254, 201, 15)',
-            'pcColor' => $countriesPercentageChange >= 0 ? 'green-600' : 'red-600',
+            'pcColor' => '', // Percentage not provided in the sample data for Active Countries
+        ],
+        [
+            'icon' => 'MdMarkEmailRead',
+            'amount' => strval($todaySubscriptionsCount),
+            'percentage' => $subscriptionsPercentageChange >= 0 ? '+' . number_format($subscriptionsPercentageChange, 2) . '%' : number_format($subscriptionsPercentageChange, 2) . '%',
+            'title' => 'Today Subscriptions',
+            'iconColor' => 'rgb(228, 106, 118)',
+            'iconBg' => 'rgb(255, 244, 229)',
+            'pcColor' => $subscriptionsPercentageChange >= 0 ? 'green-600' : 'red-600',
+        ],
+        [
+            'icon' => 'IoChatbubbleEllipsesOutline',
+            'amount' => strval($todayMessagesCount),
+            'percentage' => $messagesPercentageChange >= 0 ? '+' . number_format($messagesPercentageChange, 2) . '%' : number_format($messagesPercentageChange, 2) . '%',
+            'title' => 'Today Messages',
+            'iconColor' => 'rgb(0, 194, 146)',
+            'iconBg' => 'rgb(235, 250, 242)',
+            'pcColor' => $messagesPercentageChange >= 0 ? 'green-600' : 'red-600',
         ]
     ];
 

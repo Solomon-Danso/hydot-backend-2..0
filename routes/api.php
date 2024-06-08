@@ -118,8 +118,9 @@ Route::post('DeleteSchedule', [APPS::class, 'DeleteSchedule']);
 Route::post('GetSchedule', [APPS::class, 'GetSchedule']);
 Route::post('SendChat', [APPS::class, 'SendChat']);
 Route::post('ReplyTheChat', [APPS::class, 'ReplyTheChat']);
-
-
+Route::post('GetChat', [APPS::class, 'GetChat']);
+Route::post('GetOneEmail', [APPS::class, 'GetOneEmail']);
+Route::post('GetOneReply', [APPS::class, 'GetOneReply']);
 
 
 Route::post('ViewTotalSales', [DashBoard::class, 'ViewTotalSales']);
@@ -139,6 +140,7 @@ Route::post('Auditing', [DashBoard::class, 'Auditing']);
 Route::post('GetVisitors', [DashBoard::class, 'GetVisitors']);
 Route::post('CountVisitors', [DashBoard::class, 'CountVisitors']);
 Route::post('CountCountryVisitors', [DashBoard::class, 'CountCountryVisitors']);
+
 
 
 

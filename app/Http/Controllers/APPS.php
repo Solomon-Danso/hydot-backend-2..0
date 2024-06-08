@@ -161,6 +161,21 @@ function SendChat(Request $req){
 
 }
 
+function GetChat(){
+    $c = Chat::get();
+
+    return response()->json(["chats"=>$c],200);
+}
+
+function GetOneEmail(Request $req){
+    $c = Chat::where("EmailId", $req->EmailId)->first();
+    if ($c == null) {
+        return response()->json(["message" => "Chat not found"]);
+    }
+    return $c;
+}
+
+
 function ReplyTheChat(Request $req)
 {
     $c = Chat::where("EmailId", $req->EmailId)->first();
@@ -170,7 +185,7 @@ function ReplyTheChat(Request $req)
 
     // Create a new instance of ReplyChat
     $r = new ReplyChat();
-    $r->ReplyId = $this->audit->IdGenerator();
+    $r->ReplyId = $c->EmailId;
     $r->Email = $c->Email;
     $r->CustomerName = $c->FullName;
     $r->CustomerMessage = $c->Message;
@@ -187,6 +202,9 @@ function ReplyTheChat(Request $req)
         // Send email if the request is successful
         try {
             Mail::to($r->Email)->send(new Support($r->CustomerName, $r->Reply, $attachmentName));
+            $c->isReplied = true;
+            $c->save();
+
             return response()->json(["message" => "Reply sent successfully"]);
         } catch (\Exception $e) {
             // Return the exception message
@@ -195,6 +213,16 @@ function ReplyTheChat(Request $req)
     } else {
         return response()->json(['message' => 'Could not save the reply'], 500);
     }
+}
+
+function GetOneReply(Request $req){
+    $c = ReplyChat::where("ReplyId", $req->EmailId)
+   -> orderBy('created_at','desc')
+    ->first();
+    if ($c == null) {
+        return response()->json(["message" => "Chat not found"]);
+    }
+    return $c;
 }
 
 
