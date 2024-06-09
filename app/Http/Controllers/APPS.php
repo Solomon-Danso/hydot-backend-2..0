@@ -162,7 +162,7 @@ function SendChat(Request $req){
 }
 
 function GetChat(){
-    $c = Chat::get();
+    $c = Chat::orderBy("created_at","desc")->get();
 
     return response()->json(["chats"=>$c],200);
 }

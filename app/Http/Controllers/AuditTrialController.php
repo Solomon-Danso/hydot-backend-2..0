@@ -66,17 +66,15 @@ class AuditTrialController extends Controller
         $auditTrail->save();
     }
 
-    function Visitors() {
+    public function Visitors() {
         $ipAddress = $_SERVER['REMOTE_ADDR']; // Get user's IP address
 
-        try{
+        try {
             $ipDetails = json_decode(file_get_contents("https://ipinfo.io/{$ipAddress}/json"));
-
-        $country = $ipDetails->country ?? 'Unknown';
-        $city = $ipDetails->city ?? 'Unknown';
-        $latitude = $ipDetails->loc ?? ''; // Latitude
-
-        }catch(\Exception $e){
+            $country = $ipDetails->country ?? 'Unknown';
+            $city = $ipDetails->city ?? 'Unknown';
+            $latitude = $ipDetails->loc ?? ''; // Latitude
+        } catch (\Exception $e) {
             $country = $city = $latitude = null;
         }
 
@@ -85,10 +83,7 @@ class AuditTrialController extends Controller
 
         // Parse the user agent string to determine device and OS
         $device = $this->detectDevice($userAgent);
-        $os =  $this->detectOperatingSystem($userAgent);
-
-        // Current date and time
-
+        $os = $this->detectOperatingSystem($userAgent);
 
         // URL path
         $urlPath = $_SERVER['REQUEST_URI'];
@@ -97,15 +92,18 @@ class AuditTrialController extends Controller
 
         // Create a new AuditTrail instance and save the log to the database
         $auditTrail = new Visitors();
-        $auditTrail->IpAddress = $ipAddress??" ";
-        $auditTrail->Country = $country??" ";
-        $auditTrail->City = $city??" ";
-        $auditTrail->Device = $device??" ";
-        $auditTrail->Os = $os??" ";
-        $auditTrail->googlemap = $googleMapsLink??" ";
+        $auditTrail->IpAddress = $ipAddress ?? " ";
+        $auditTrail->Country = $country ?? " ";
+        $auditTrail->City = $city ?? " ";
+        $auditTrail->Device = $device ?? " ";
+        $auditTrail->Os = $os ?? " ";
+        $auditTrail->googlemap = $googleMapsLink ?? " ";
 
         $auditTrail->save();
+
+        return response()->json(['success'=>'true'],200);
     }
+
 
 
 

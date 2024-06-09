@@ -30,36 +30,85 @@ class Websites extends Controller
     function CreateHero(Request $req) {
         $s =  Hero::firstOrNew();
         $fields = ['Picture1', 'Picture2', 'Picture3', 'Picture4', 'Picture5', 'Picture6'];
-        
+
         foreach ($fields as $field) {
             if ($req->hasFile($field)) {
                 $s->$field = $req->file($field)->store("", "public");
             }
         }
-    
+
         $sections = ['Section1', 'Section2', 'Section3', 'Section4']; // Added missing semicolon here
-        
+
         foreach ($sections as $sec) {
             if ($req->filled($sec)) {
                 $s->$sec = $req->$sec;
             }
         }
-    
+
         $saver = $s->save();
         if ($saver) {
             $message = "Hero Was Created";
             $this->audit->Auditor($req->AdminId, $message);
-    
+
             return response()->json(["message" => "Hero Created Successfully"], 200);
         } else {
             return response()->json(["message" => "An error occurred creating hero"], 400);
         }
     }
-    
 
-   function ViewHero(){
-    return Hero::get();
-   }
+
+    public function ViewHero()
+    {
+        // Fetch the current data from the database
+        $heroes = Hero::all();
+
+        // Assuming you want to map the first Hero item returned, adjust as needed
+        $currentData = $heroes->first();
+
+        // Map the current data to the desired format
+        $mappedData = [
+            [
+                'src' => "{$currentData->Picture1}",
+                'bg' => "#0be4d1",
+                'delay' => 0.1,
+            ],
+            [
+                'src' => "{$currentData->Picture2}",
+                'bg' => "#fde490",
+                'delay' => 0.3,
+            ],
+            [
+                'src' => "{$currentData->Picture3}",
+                'bg' => "#00c9f7",
+                'delay' => 0.2,
+            ],
+            [
+                'src' => "{$currentData->Picture4}",
+                'bg' => "#83cfdf",
+                'delay' => 0.2,
+            ],
+            [
+                'src' => "{$currentData->Picture5}",
+                'bg' => "#fe8856",
+                'delay' => 0.3,
+            ],
+            [
+                'src' => "{$currentData->Picture6}",
+                'bg' => "#0be4d1",
+                'delay' => 0.25,
+            ],
+        ];
+
+        $final = [
+            'mapped'=>$mappedData,
+            'section'=>$currentData
+        ];
+
+        return response()->json($final);
+    }
+
+
+
 
    function CreateWhatWeDo(Request $req){
     $s = WhatWeDo::firstOrNew();
@@ -68,7 +117,7 @@ class Websites extends Controller
         'Main_Title','Secondary_Title',
         'Left_Main_Title','Left_Secondary_Title','Left_Text1','Left_Text2','Left_Text3',
         'Right_Main_Title','Right_Secondary_Title','Right_Text1','Right_Text2','Right_Text3',
-        'Middle_Main_Title','Middle_Secondary_Title','Middle_Text1','Middle_Text2'   
+        'Middle_Main_Title','Middle_Secondary_Title','Middle_Text1','Middle_Text2'
     ];
 
     foreach($fields as $field){
@@ -96,8 +145,46 @@ class Websites extends Controller
    }
 
    function ViewWhatWeDo(){
-    return WhatWeDo::get();
-   }
+    $heroes = WhatWeDo::all();
+    $currentData = $heroes->first();
+
+    $mappedData = [
+        [
+            'icon'=> "/features/Frame-0.png",
+            'title' => "{$currentData->Left_Text1}",
+        ],
+        [
+            'icon'=> "/features/Frame-1.png",
+            'title' => "{$currentData->Left_Text2}",
+        ],
+        [
+            'icon'=> "/features/Frame-2.png",
+            'title' => "{$currentData->Left_Text3}",
+        ],
+        [
+            'icon'=> "/features/Frame-3.png",
+            'title' => "{$currentData->Right_Text1}",
+        ],
+        [
+            'icon'=> "/features/Frame-4.png",
+            'title' => "{$currentData->Right_Text2}",
+        ],
+        [
+            'icon'=> "/features/Frame-5.png",
+            'title' => "{$currentData->Right_Text3}",
+        ],
+    ];
+
+    $final = [
+        'mapped'=>$mappedData,
+        'section'=>$currentData
+    ];
+
+    return response()->json($final);
+
+}
+
+
 
    function CreateOurDifferences(Request $req){
     $s = OurDifferences::firstOrNew();
@@ -107,7 +194,7 @@ class Websites extends Controller
         'Left_Main_Title','Left_Description',
         'Right_Main_Title','Right_Description',
         'Middle_Main_Title','Middle_Description',
-       
+
     ];
 
     foreach($fields as $field){
@@ -134,9 +221,40 @@ class Websites extends Controller
 
    }
 
+
+
    function ViewOurDifferences(){
-    return OurDifferences::get();
-   }
+    $heroes = OurDifferences::all();
+    $currentData = $heroes->first();
+
+    $mappedData = [
+        [
+            'icon'=> "/OurDiff/Frame-0.png",
+            'title' => "{$currentData->Left_Main_Title}",
+            'des' => "{$currentData->Left_Description}",
+        ],
+        [
+            'icon'=> "/OurDiff/Frame-1.png",
+            'title' => "{$currentData->Right_Main_Title}",
+            'des' => "{$currentData->Right_Description}",
+        ],
+        [
+            'icon'=> "/OurDiff/Frame-2.png",
+            'title' => "{$currentData->Middle_Main_Title}",
+            'des' => "{$currentData->Middle_Description}",
+        ],
+
+    ];
+
+    $final = [
+        'mapped'=>$mappedData,
+        'section'=>$currentData
+    ];
+
+    return response()->json($final);
+
+}
+
 
    function CreateOurProcess(Request $req){
     $s = OurProcess::firstOrNew();
@@ -146,7 +264,7 @@ class Websites extends Controller
         'Left_Main_Title','Left_Description',
         'Right_Main_Title','Right_Description',
         'Middle_Main_Title','Middle_Description',
-       
+
     ];
 
     foreach($fields as $field){
@@ -173,15 +291,44 @@ class Websites extends Controller
 
    }
 
+
    function ViewOurProcess(){
-    return OurProcess::get();
-   }
+    $heroes = OurProcess::all();
+    $currentData = $heroes->first();
+
+    $mappedData = [
+        [
+            'icon'=> "/howItWorks/Frame-0.png",
+            'title' => "{$currentData->Left_Main_Title}",
+            'des' => "{$currentData->Left_Description}",
+        ],
+        [
+            'icon'=> "/howItWorks/Frame-1.png",
+            'title' => "{$currentData->Right_Main_Title}",
+            'des' => "{$currentData->Right_Description}",
+        ],
+        [
+            'icon'=> "/howItWorks/Frame-2.png",
+            'title' => "{$currentData->Middle_Main_Title}",
+            'des' => "{$currentData->Middle_Description}",
+        ],
+
+    ];
+
+    $final = [
+        'mapped'=>$mappedData,
+        'section'=>$currentData
+    ];
+
+    return response()->json($final);
+
+}
 
    function CreateOurPortfolioHeader(Request $req){
     $s = OurPortfolioHeader::firstOrNew();
 
     $fields = [
-        'Main_Title','Secondary_Title',  
+        'Main_Title','Secondary_Title',
     ];
 
     foreach($fields as $field){
@@ -209,20 +356,21 @@ class Websites extends Controller
    }
 
    function ViewOurPortfolioHeader(){
-    return OurPortfolioHeader::get();
+    $c = OurPortfolioHeader::first();
+    return $c;
    }
 
    function CreateOurPortfolioProjects(Request $req){
-  
+
     $user = OurPortfolioProjects::where("ProjectName",$req->ProjectName)->first();
     if($user){
         return response()->json(["message"=>$req->ProjectName." already exist"],400);
     }
-  
+
     $s = new OurPortfolioProjects();
 
     if($req->hasFile("Picture")){
-        $s->Picture = $req->file("Picture")->store("", "public"); 
+        $s->Picture = $req->file("Picture")->store("", "public");
     }
 
     if($req->filled("Link")){
@@ -251,21 +399,21 @@ class Websites extends Controller
 
     }
 
-    
+
 
 
    }
 
    function UpdateOurPortfolioProjects(Request $req){
-  
-  
+
+
     $s =  OurPortfolioProjects::where('ProjectId',$req->ProjectId)->first();
     if($s==null){
         return response()->json(["message"=>"Projects does not exist"],400);
     }
 
     if($req->hasFile("Picture")){
-        $s->Picture = $req->file("Picture")->store("", "public"); 
+        $s->Picture = $req->file("Picture")->store("", "public");
     }
 
     if($req->filled("Link")){
@@ -291,7 +439,7 @@ class Websites extends Controller
 
     }
 
-    
+
 
 
    }
@@ -302,13 +450,13 @@ class Websites extends Controller
 
 
    function DeleteOurPortfolioProjects(Request $req){
-  
+
     $p = OurPortfolioProjects::where("ProjectId",$req->ProjectId)->first();
     if($p==null){
         return response()->json(["message"=>"Project does not exist"],400);
     }
-  
-  
+
+
     $saver = $p->delete();
 
     if($saver){
@@ -331,7 +479,7 @@ class Websites extends Controller
     $s = OurClientHeader::firstOrNew();
 
     if($req->hasFile("Picture")){
-        $s->Picture = $req->file("Picture")->store("", "public"); 
+        $s->Picture = $req->file("Picture")->store("", "public");
     }
 
     if($req->filled("Main_Title")){
@@ -357,12 +505,12 @@ class Websites extends Controller
    }
 
    function ViewOurClientsHeader(){
-    return OurClientHeader::get();
+    return OurClientHeader::first();
    }
 
    function CreateOurClientsProjects(Request $req){
-  
-  
+
+
     $s = new OurClients();
 
 
@@ -374,7 +522,7 @@ class Websites extends Controller
         $s->Description = $req->Description;
     }
 
-   
+
     $saver = $s->save();
 
     if($saver){
@@ -388,14 +536,14 @@ class Websites extends Controller
 
     }
 
-    
+
 
 
    }
 
    function UpdateOurClientsProjects(Request $req){
-  
-  
+
+
     $s =  OurClients::where('id',$req->Id)->first();
     if($s==null){
         return response()->json(["message"=>"Clients Project does not exist"],400);
@@ -410,7 +558,7 @@ class Websites extends Controller
         $s->Description = $req->Description;
     }
 
-   
+
     $saver = $s->save();
 
     if($saver){
@@ -424,7 +572,7 @@ class Websites extends Controller
 
     }
 
-    
+
 
 
    }
@@ -437,13 +585,13 @@ class Websites extends Controller
 
 
    function DeleteOurClientsProjects(Request $req){
-  
+
     $p = OurClients::where("id",$req->Id)->first();
     if($p==null){
         return response()->json(["message"=>"Project does not exist"],400);
     }
-  
-  
+
+
     $saver = $p->delete();
 
     if($saver){
@@ -457,15 +605,15 @@ class Websites extends Controller
 
     }
 
-    
+
 
 
    }
 
 
    function CreateTestimonials(Request $req){
-  
-  
+
+
     $s = new Testimonials();
 
 
@@ -481,7 +629,7 @@ class Websites extends Controller
         $s->Position = $req->Position;
     }
 
-   
+
     $saver = $s->save();
 
     if($saver){
@@ -495,14 +643,14 @@ class Websites extends Controller
 
     }
 
-    
+
 
 
    }
 
    function UpdateTestimonials(Request $req){
-  
-  
+
+
     $s = Testimonials::where('id',$req->Id)->first();
     if($s==null){
         return response()->json(["message"=>"Testimonials does not exist"],400);
@@ -521,7 +669,7 @@ class Websites extends Controller
         $s->Position = $req->Position;
     }
 
-   
+
     $saver = $s->save();
 
     if($saver){
@@ -535,24 +683,32 @@ class Websites extends Controller
 
     }
 
-    
+
 
 
    }
 
    function ViewTestimonials(){
-    return Testimonials::get();
-   }
+    // Fetch all testimonials from the database
+    $testimonials = Testimonials::all();
+
+
+
+    // Return the transformed data as JSON
+    return  $testimonials;
+}
+
+
 
 
    function DeleteTestimonials(Request $req){
-  
+
     $p = Testimonials::where("id",$req->Id)->first();
     if($p==null){
         return response()->json(["message"=>"Testimonials does not exist"],400);
     }
-  
-  
+
+
     $saver = $p->delete();
 
     if($saver){
@@ -566,7 +722,7 @@ class Websites extends Controller
 
     }
 
-    
+
 
 
    }
