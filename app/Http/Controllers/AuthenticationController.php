@@ -253,8 +253,7 @@ function Securities($Email) {
     $auditTrail -> userName = $user->Name;
     $auditTrail -> userPic = $user->Picture??" ";
     $auditTrail->SessionId = $this->TokenGenerator();
-    $auditTrail->last_activity = Carbon::now()->timestamp;
-    $auditTrail->lastLogin = Carbon::now();
+     $auditTrail->lastLogin = Carbon::now();
 
 
 
