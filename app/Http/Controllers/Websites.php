@@ -107,6 +107,16 @@ class Websites extends Controller
         return response()->json($final);
     }
 
+    function ViewAdminHero(){
+        $heroes = Hero::all();
+
+        // Assuming you want to map the first Hero item returned, adjust as needed
+        $currentData = $heroes->first();
+
+        return response()->json([$currentData]);
+    }
+
+
 
 
 
@@ -184,6 +194,16 @@ class Websites extends Controller
 
 }
 
+function ViewAdminWhatWeDo(){
+    $heroes = WhatWeDo::all();
+
+    // Assuming you want to map the first Hero item returned, adjust as needed
+    $currentData = $heroes->first();
+
+    return response()->json([$currentData]);
+}
+
+
 
 
    function CreateOurDifferences(Request $req){
@@ -255,6 +275,15 @@ class Websites extends Controller
 
 }
 
+function ViewAdminOurDifferences(){
+    $heroes = OurDifferences::all();
+
+    // Assuming you want to map the first Hero item returned, adjust as needed
+    $currentData = $heroes->first();
+
+    return response()->json([$currentData]);
+}
+
 
    function CreateOurProcess(Request $req){
     $s = OurProcess::firstOrNew();
@@ -324,6 +353,16 @@ class Websites extends Controller
 
 }
 
+function ViewAdminOurProcess(){
+    $heroes = OurProcess::all();
+
+    // Assuming you want to map the first Hero item returned, adjust as needed
+    $currentData = $heroes->first();
+
+    return response()->json([$currentData]);
+}
+
+
    function CreateOurPortfolioHeader(Request $req){
     $s = OurPortfolioHeader::firstOrNew();
 
@@ -359,6 +398,16 @@ class Websites extends Controller
     $c = OurPortfolioHeader::first();
     return $c;
    }
+
+   function ViewAdminOurPortfolioHeader(){
+    $heroes = OurPortfolioHeader::all();
+
+    // Assuming you want to map the first Hero item returned, adjust as needed
+    $currentData = $heroes->first();
+
+    return response()->json([$currentData]);
+}
+
 
    function CreateOurPortfolioProjects(Request $req){
 

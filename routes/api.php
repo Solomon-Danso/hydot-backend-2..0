@@ -35,6 +35,7 @@ Route::post('ViewOurClientsProjects', [Websites::class, 'ViewOurClientsProjects'
 Route::post('ViewTestimonials', [Websites::class, 'ViewTestimonials']);
 Route::post('SendChat', [APPS::class, 'SendChat']);
 
+//Admin Panel Changes
 
 
 
@@ -137,6 +138,17 @@ Route::post('Auditing', [DashBoard::class, 'Auditing']);
 Route::post('GetVisitors', [DashBoard::class, 'GetVisitors']);
 Route::post('CountVisitors', [DashBoard::class, 'CountVisitors']);
 Route::post('CountCountryVisitors', [DashBoard::class, 'CountCountryVisitors']);
+
+
+Route::post('ViewAdminHero', [Websites::class, 'ViewAdminHero']);
+Route::post('ViewAdminWhatWeDo', [Websites::class, 'ViewAdminWhatWeDo']);
+Route::post('ViewAdminOurDifferences', [Websites::class, 'ViewAdminOurDifferences']);
+Route::post('ViewAdminOurProcess', [Websites::class, 'ViewAdminOurProcess']);
+Route::post('ViewAdminOurPortfolioHeader', [Websites::class, 'ViewAdminOurPortfolioHeader']);
+
+
+
+
 
 
 
