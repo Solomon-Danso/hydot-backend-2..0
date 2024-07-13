@@ -12,6 +12,7 @@ use App\Http\Controllers\ClientApiController;
 use App\Http\Controllers\APPS;
 use App\Http\Controllers\DashBoard;
 use App\Http\Controllers\AuditTrialController;
+use App\Http\Controllers\GlobalPaymentController;
 
 
 // Route for setting up the admin, accessible without authentication
@@ -35,7 +36,12 @@ Route::post('ViewOurClientsProjects', [Websites::class, 'ViewOurClientsProjects'
 Route::post('ViewTestimonials', [Websites::class, 'ViewTestimonials']);
 Route::post('SendChat', [APPS::class, 'SendChat']);
 
-//Admin Panel Changes
+//Payment Integration
+Route::post('AddPayment', [GlobalPaymentController::class, 'AddPayment']);
+Route::post('GetPayment', [GlobalPaymentController::class, 'GetPayment']);
+Route::get('TestPayment', [GlobalPaymentController::class, 'TestPayment']);
+
+
 
 
 
