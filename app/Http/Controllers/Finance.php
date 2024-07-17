@@ -65,15 +65,18 @@ class Finance extends Controller
             Log::info('existingExpireDate:');
             Log::info($existingExpireDate);
 
-            $existingRemainingDays = $existingExpireDate->diffInDays($currentDate);
+            $existingRemainingDays = $currentDate->diffInDays($existingExpireDate);
             Log::info('Existing RemainDays:');
             Log::info($existingRemainingDays);
 
             Log::info('newSubscriptionDays');
             Log::info($newSubscriptionDays);
+            if($existingRemainingDays<0){
+                $existingRemainingDays = 0;
+            }
             
-            $existingExpireDate->addDays($existingRemainingDays+$newSubscriptionDays); // Extend expiry date by 500 days
-            $expireDate = $existingExpireDate;
+            $expireDate = $currentDate->addDays($existingRemainingDays+$newSubscriptionDays); // Extend expiry date by 500 days
+
         } else {
             $expireDate = $currentDate->copy()->addDays($newSubscriptionDays);
         }
