@@ -18,7 +18,6 @@ return new class extends Migration
             $table->longText("Country")->nullable();
             $table->longText("Picture")->nullable();
             $table->longText("Name")->nullable();
-            $table->longText("Location")->nullable();
             $table->longText("Phone")->nullable();
             $table->longText("Email")->nullable();
             $table->longText("Password")->nullable();
