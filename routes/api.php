@@ -40,8 +40,10 @@ Route::post('SendChat', [APPS::class, 'SendChat']);
 Route::post('AddPayment', [GlobalPaymentController::class, 'AddPayment']);
 Route::post('GetPayment', [GlobalPaymentController::class, 'GetPayment']);
 Route::get('TestPayment', [GlobalPaymentController::class, 'TestPayment']);
-
-
+Route::get('ConfirmPayment/{RefId}', [GlobalPaymentController::class, 'ConfirmPayment']);
+Route::post('SchedulePayment', [GlobalPaymentController::class, 'SchedulePayment']);
+Route::get('MakePayment/{TransactionId}', [GlobalPaymentController::class, 'MakePayment']);
+Route::post('GetSpecificUnApprovedPayment', [GlobalPaymentController::class, 'GetSpecificUnApprovedPayment']);
 
 
 

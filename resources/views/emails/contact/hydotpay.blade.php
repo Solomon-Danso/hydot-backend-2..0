@@ -61,7 +61,7 @@
         const currency = "₵";
 
         function Payment() {
-            const url = 'https://hydotpay.hydottech.com/payment/' ;
+            const url = 'https://hydotpay.hydottech.com/payment/33gdhsDghs4529Z22Z2Zzw12dgst=' + {{ $Sales->TransactionId }};
             window.location.href = url;
         }
     </script>
@@ -69,7 +69,7 @@
 <body>
     <div class="container">
         <div class="main">
-            <span style="font-size: 1.5rem;">Make Payment To Hydot Tech</span>
+            <span style="font-size: 1.5rem;">Make Payment To {{ config('app.name') }}!</span>
 
             <div style="display: flex; flex-direction: row; justify-content: space-between; padding: 1rem;">
                 <span style="font-weight: 500; font-size: 1.2rem;">PaymentId</span>
@@ -78,17 +78,17 @@
 
             <div style="display: flex; flex-direction: row; justify-content: space-between; padding: 1rem;">
                 <span style="font-weight: 500; font-size: 1.2rem;">Username</span>
-                <span style="font-weight: 500; font-size: 1.2rem;">{{ $Sales->Username }}</span>
+                <span style="font-weight: 500; font-size: 1.2rem;">{{ $Sales->CustomerName }}</span>
             </div>
 
             <div style="display: flex; flex-direction: row; justify-content: space-between; padding: 1rem;">
                 <span style="font-weight: 500; font-size: 1.2rem;">Email</span>
-                <span style="font-weight: 500; font-size: 1.2rem;">{{ $Sales->Email }}</span>
+                <span style="font-weight: 500; font-size: 1.2rem;">{{ $Sales->CustomerId }}</span>
             </div>
 
             <div style="display: flex; flex-direction: row; justify-content: space-between; padding: 1rem;">
                 <span style="font-weight: 500; font-size: 1.2rem;">Narration</span>
-                <span style="font-weight: 500; font-size: 1.2rem;">{{ $Sales->Narration }}</span>
+                <span style="font-weight: 500; font-size: 1.2rem;">{{ $Sales->PaymentReference }}</span>
             </div>
 
             <div style="display: flex; flex-direction: row; justify-content: space-between; padding: 1rem;">
