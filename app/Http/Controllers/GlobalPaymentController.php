@@ -11,6 +11,7 @@ use App\Http\Controllers\AuditTrialController;
 use Paystack;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\HydotPay;
+use App\Models\AdminUser;
 
 
 class GlobalPaymentController extends Controller
@@ -96,13 +97,13 @@ public function SchedulePayment(Request $req){
 
     foreach($sections as $sec){
         if($req->filled($sec)){
-            $s-$sec = $req->$sec;
+            $s->$sec = $req->$sec;
         }
     }
 
     $s->Created_By_Id = $stu->UserId;
     $s->Created_By_Name = $stu->Name;
-    $s->TransactionId = $this->TokenGenerator();
+    $s->TransactionId = $this-> IdGenerator();
     $s->IsApproved = false;
 
     $saver = $s->save();
@@ -134,9 +135,9 @@ public function MakePayment($TransactionId)
         // Ensure the total amount is an integer and in the smallest currency unit (e.g., kobo, pesewas)
         $totalInPesewas = intval($sales->Amount * 100);
 
-        $tref = Paystack::genTranxRef();
+        //$tref = Paystack::genTranxRef();
 
-        $saver = $s->save();
+        $saver = $sales->save();
         if ($saver) {
 
 
@@ -146,7 +147,7 @@ public function MakePayment($TransactionId)
                 'Product' => 'Manual Collection',
                 'Username' => $sales->CustomerName,
                 'Amount' => $sales->Amount,
-                'SuccessApi' => 'https://mainapi.hydottech.com/api/ConfirmPayment/'.$tref,
+                'SuccessApi' => 'https://mainapi.hydottech.com/api/ConfirmPayment/'.$TransactionId,
                 //'SuccessApi' => 'https://hydottech.com',
                 'CallbackURL' => 'https://hydottech.com',
             ]);
@@ -155,7 +156,7 @@ public function MakePayment($TransactionId)
 
                 $paystackData = [
                     "amount" => $totalInPesewas, // Amount in pesewas
-                    "reference" => $tref,
+                    "reference" => $TransactionId,
                     "email" => $sales->CustomerId,
                     "currency" => "GHS",
                 ];
@@ -186,7 +187,7 @@ function ConfirmPayment($RefId)
         return response()->json(["message" => "Payment confirmed successfully"], 200);
     }
     else{
-        return response()->json(["message" => "Failed to confirm payment"], 200);
+        return response()->json(["message" => "Failed to confirm payment"], 400);
     }
 
 
@@ -206,7 +207,10 @@ function GetSpecificUnApprovedPayment(Request $req){
 
 
 
-
+function IdGenerator(): string {
+    $randomID = str_pad(mt_rand(1, 99999999), 30, '0', STR_PAD_LEFT);
+    return $randomID;
+    }
 
 
 function TokenGenerator(): string {

@@ -96,6 +96,7 @@ Route::middleware([ApiAuthenticator::class])->group(function () {
     Route::post('UpdateTestimonials', [Websites::class, 'UpdateTestimonials']);
     Route::post('DeleteTestimonials', [Websites::class, 'DeleteTestimonials']);
 
+    Route::post('SchedulePayment', [GlobalPaymentController::class, 'SchedulePayment']);
 
     Route::post('CreateSales', [Finance::class, 'CreateSales']);
     Route::post('ViewSales', [Finance::class, 'ViewSales']);

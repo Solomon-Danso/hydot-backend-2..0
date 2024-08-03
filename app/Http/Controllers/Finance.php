@@ -34,33 +34,33 @@ class Finance extends Controller
         $a = AdminUser::where('UserId', $req->AdminId)->first();
         $c = Customers::where('UserId', $req->CustomerId)->first();
         $p = PriceConfiguration::where('ProductId', $req->ProductId)->first();
-    
+
         if ($a == null) {
             return response()->json(['message' => 'Admin not found'], 400);
         }
-    
+
         if ($c == null) {
             return response()->json(['message' => 'Customer not found'], 400);
         }
-    
+
         if ($p == null) {
             return response()->json(['message' => 'Product not found'], 400);
         }
-    
+
         $currentDate = Carbon::now();
         $newSubscriptionDays = ceil($req->Amount / $p->Amount);
-    
+
         $existingToken = Sales::where('CustomerId', $c->UserId)
                       ->where('ProductId', $p->ProductId)
                       ->orderBy('created_at', 'desc')
                       ->first();
 
-    
+
         if ($existingToken) {
            // return response()->json(['message' => 'Token Exist'], 400);
             Log::info('Existing token found:');
             Log::info($existingToken);
-    
+
             $existingExpireDate = Carbon::parse($existingToken->ExpireDate);
             Log::info('existingExpireDate:');
             Log::info($existingExpireDate);
@@ -74,13 +74,13 @@ class Finance extends Controller
             if($existingRemainingDays<0){
                 $existingRemainingDays = 0;
             }
-            
+
             $expireDate = $currentDate->addDays($existingRemainingDays+$newSubscriptionDays); // Extend expiry date by 500 days
 
         } else {
             $expireDate = $currentDate->copy()->addDays($newSubscriptionDays);
         }
-    
+
         // Create a new sales record
         $s = new Sales();
         $s->Created_By_Id = $req->AdminId;
@@ -96,17 +96,17 @@ class Finance extends Controller
         $s->StartDate = Carbon::now();
         $s->SystemDate = Carbon::now();
         $s->ExpireDate = $expireDate;
-    
+
         if ($req->filled('PaymentMethod')) {
             $s->PaymentMethod = $req->PaymentMethod;
         }
-    
+
         if ($req->filled('PaymentReference')) {
             $s->PaymentReference = $req->PaymentReference;
         }
-    
+
         $saver = $s->save();
-    
+
         if ($saver) {
             $message = $c->Name . " made a payment of " . $req->Amount . " for " . $p->ProductName;
             $this->audit->Auditor($req->AdminId, $message);
@@ -120,13 +120,17 @@ class Finance extends Controller
             return response()->json(["Request" => "Failed"], 400);
         }
     }
-    
-    
+
+
 
 
 
 function ViewSales(){
         return Sales::get();
+}
+
+function ViewManualSales(){
+    return Sales::where("IsApproved",true)->get();
 }
 
 function ViewOneSale(Request $req){
