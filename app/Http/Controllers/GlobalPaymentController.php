@@ -12,6 +12,7 @@ use Paystack;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\HydotPay;
 use App\Models\AdminUser;
+use App\Models\Payment;
 
 
 class GlobalPaymentController extends Controller
@@ -124,6 +125,9 @@ public function SchedulePayment(Request $req){
 
 }
 
+
+
+
 public function MakePayment($TransactionId)
 {
 
@@ -204,6 +208,192 @@ function GetSpecificUnApprovedPayment(Request $req){
 
 
 }
+
+
+
+
+public function GenerateReceiptCode(Request $req) {
+    $stu = AdminUser::where('UserId', $req->AdminId)->first();
+    if ($stu == null) {
+        return response()->json(["message" => "Admin does not exist"], 400);
+    }
+
+    $s = new Payment();
+
+    $fields = [
+        'type' => "mobile_money",
+        'name' => $req->name,
+        'account_number' => $req->account_number,
+        'bank_code' => $req->bank_code,
+        'currency' => "GHS"
+    ];
+
+    $url = "https://api.paystack.co/transferrecipient";
+
+    try {
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . env('PAYSTACK_SECRET_KEY'),
+            'Cache-Control' => 'no-cache',
+        ])->timeout(60)->post($url, $fields);
+
+        $responseBody = $response->json();
+
+        if (isset($responseBody['status']) && $responseBody['status'] === true) {
+            $recipientData = $responseBody['data'];
+
+            // Fill payment model with Paystack response data
+            $s->recipient_code = $recipientData['recipient_code'];
+            $s->name = $recipientData['name'];
+            $s->account_number = $recipientData['details']['account_number'];
+            $s->bank_code = $recipientData['details']['bank_code'];
+            $s->currency = $recipientData['currency'];
+            $s->type = $recipientData['type'];
+            $theCode = $this->TokenGenerator();
+            $s->reference_code = $theCode;
+
+
+            $saver = $s->save();
+            if ($saver) {
+
+            //     $this->GenerateTransferCode(
+            //     $req->AdminId,
+            //     $req->Amount,
+            //     $s->recipient_code,
+            //     $s->reference_code
+            // );
+                $message = "Scheduled payment for " .  $s->account_number;
+                $this->audit->Auditor($req->AdminId, $message);
+
+                return response()->json(["message" => $message], 200);
+            } else {
+                return response()->json(["message" => "Failed to initialize payment"], 400);
+            }
+        } else {
+            return response()->json(["message" => "Failed to create Paystack transfer recipient", "details" => $responseBody['message']], 400);
+        }
+    } catch (\Exception $e) {
+        return response()->json(["message" => "An error occurred while creating transfer recipient", "details" => $e->getMessage()], 500);
+    }
+}
+
+
+function GenerateTransferCode(Request $req) {
+    $stu = AdminUser::where('UserId', $req->AdminId)->first();
+    if ($stu == null) {
+        return response()->json(["message" => "Admin does not exist"], 400);
+    }
+
+    $s = Payment::where("reference_code",$req->reference_code)->first();
+    if(!$s){
+        return response()->json(["message" => "Payment does not exist, be very careful"], 400);
+    }
+
+    $fields = [
+        "source" => "balance",
+        "reason" => "Momo transfer",
+        "amount" => $req->Amount,
+        "recipient" => $req->Recipient
+        ];
+
+    $url = "https://api.paystack.co/transfer";
+
+    try {
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . env('PAYSTACK_SECRET_KEY'),
+            'Cache-Control' => 'no-cache',
+        ])->timeout(60)->post($url, $fields);
+
+        $responseBody = $response->json();
+
+        if (isset($responseBody['status']) && $responseBody['status'] === true) {
+            $recipientData = $responseBody['data'];
+
+            $s->amount = $Amount;
+            $s->transfer_code = $recipientData['transfer_code'];
+            $s->IsPayed = false;
+
+
+            $saver = $s->save();
+            if ($saver) {
+
+                $message = "Generated transfer code for " .  $s->account_number;
+                $this->audit->Auditor($req->AdminId, $message);
+
+                return response()->json(["message" => $message], 200);
+            } else {
+                return response()->json(["message" => "Failed to generate transfer code"], 400);
+            }
+        } else {
+            return response()->json(["message" => "Failed to create Paystack transfer recipient", "details" => $responseBody['message']], 400);
+        }
+    } catch (\Exception $e) {
+        return response()->json(["message" => "An error occurred while creating transfer recipient", "details" => $e->getMessage()], 500);
+    }
+}
+
+
+
+public function FinalPayment(Request $req) {
+    $stu = AdminUser::where('UserId', $req->AdminId)->first();
+    if ($stu == null) {
+        return response()->json(["message" => "Admin does not exist"], 400);
+    }
+
+    $s = Payment::where("reference_code",$req->reference_code)->first();
+    if(!$s){
+        return response()->json(["message" => "Payment does not exist, be very careful"], 400);
+    }
+
+    $fields = [
+        "transfer_code" => $s->transfer_code,
+        "otp" => $req->OTP
+      ];
+
+    $url = "https://api.paystack.co/transfer/finalize_transfer";
+
+    try {
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . env('PAYSTACK_SECRET_KEY'),
+            'Cache-Control' => 'no-cache',
+        ])->timeout(60)->post($url, $fields);
+
+        $responseBody = $response->json();
+
+        if (isset($responseBody['status']) && $responseBody['status'] === true) {
+            $recipientData = $responseBody['data'];
+
+
+            $s->IsPayed = true;
+
+
+            $saver = $s->save();
+            if ($saver) {
+
+                $message = "Generated transfer code for " .  $s->account_number;
+                $this->audit->Auditor($AdminId, $message);
+
+                return response()->json(["message" => $message], 200);
+            } else {
+                return response()->json(["message" => "Failed to generate transfer code"], 400);
+            }
+        } else {
+            return response()->json(["message" => "Failed to create Paystack transfer recipient", "details" => $responseBody['message']], 400);
+        }
+    } catch (\Exception $e) {
+        return response()->json(["message" => "An error occurred while creating transfer recipient", "details" => $e->getMessage()], 500);
+    }
+}
+
+function GetAllPaymentToClient(){
+   // $s = Payment::where("reference_code",$req->Reference)->first();
+    return Payment::get();
+}
+
+
+
+
+
+
 
 
 

@@ -44,6 +44,10 @@ Route::get('ConfirmPayment/{RefId}', [GlobalPaymentController::class, 'ConfirmPa
 Route::post('SchedulePayment', [GlobalPaymentController::class, 'SchedulePayment']);
 Route::get('MakePayment/{TransactionId}', [GlobalPaymentController::class, 'MakePayment']);
 Route::post('GetSpecificUnApprovedPayment', [GlobalPaymentController::class, 'GetSpecificUnApprovedPayment']);
+Route::post('GenerateReceiptCode', [GlobalPaymentController::class, 'GenerateReceiptCode']);
+Route::post('FinalPayment', [GlobalPaymentController::class, 'FinalPayment']);
+Route::post('GenerateTransferCode', [GlobalPaymentController::class, 'GenerateTransferCode']);
+Route::post('GetAllPaymentToClient', [GlobalPaymentController::class, 'GetAllPaymentToClient']);
 
 
 
