@@ -13,7 +13,9 @@ use App\Http\Controllers\APPS;
 use App\Http\Controllers\DashBoard;
 use App\Http\Controllers\AuditTrialController;
 use App\Http\Controllers\GlobalPaymentController;
-
+use App\Http\Controllers\PartnerDashBoard;
+use App\Http\Controllers\PartnerAuthentication;
+use App\Http\Controllers\PartnerController;
 
 // Route for setting up the admin, accessible without authentication
 Route::post('SetUpCreateAdmin', [AdminUserController::class, 'SetUpCreateAdmin']);
@@ -24,6 +26,12 @@ Route::post('ForgetPasswordStep1', [AuthenticationController::class, 'ForgetPass
 Route::post('ForgetPasswordStep2', [AuthenticationController::class, 'ForgetPasswordStep2']);
 Route::post('Visitors', [AuditTrialController::class, 'Visitors']);
 Route::post('UnLocker', [AdminUserController::class, 'UnLocker']);
+
+
+
+
+
+
 
 Route::post('ViewHero', [Websites::class, 'ViewHero']);
 Route::post('ViewWhatWeDo', [Websites::class, 'ViewWhatWeDo']);
@@ -49,6 +57,15 @@ Route::post('FinalPayment', [GlobalPaymentController::class, 'FinalPayment']);
 Route::post('GenerateTransferCode', [GlobalPaymentController::class, 'GenerateTransferCode']);
 Route::post('GetAllPaymentToClient', [GlobalPaymentController::class, 'GetAllPaymentToClient']);
 
+//Partner Section
+Route::post('PartnerLogIn', [PartnerAuthentication::class, 'PartnerLogIn']);
+Route::post('PartnerVerifyToken', [PartnerAuthentication::class, 'PartnerVerifyToken']);
+Route::post('CreatePartner', [PartnerController::class, 'CreatePartner']);
+Route::post('PartnerForgetPasswordStep1', [PartnerAuthentication::class, 'PartnerForgetPasswordStep1']);
+Route::post('PartnerForgetPasswordStep2', [PartnerAuthentication::class, 'PartnerForgetPasswordStep2']);
+Route::post('PartnerUnLocker', [PartnerAuthentication::class, 'PartnerUnLocker']);
+
+
 
 
 
@@ -58,6 +75,15 @@ Route::post('GetAllPaymentToClient', [GlobalPaymentController::class, 'GetAllPay
 
 // Routes that require authentication
 Route::middleware([ApiAuthenticator::class])->group(function () {
+
+
+
+
+
+
+
+
+
 
 
 
@@ -83,6 +109,10 @@ Route::middleware([ApiAuthenticator::class])->group(function () {
     Route::post('ViewSingleCustomers', [CustomersController::class, 'ViewSingleCustomers']);
     Route::post('ViewAllCustomers', [CustomersController::class, 'ViewAllCustomers']);
     Route::post('DeleteCustomers', [CustomersController::class, 'DeleteCustomers']);
+    Route::post('ViewPartnerCustomers', [CustomersController::class, 'ViewPartnerCustomers']);
+
+
+
 
     Route::post('CreateHero', [Websites::class, 'CreateHero']);
     Route::post('CreateWhatWeDo', [Websites::class, 'CreateWhatWeDo']);
@@ -103,7 +133,10 @@ Route::middleware([ApiAuthenticator::class])->group(function () {
     Route::post('SchedulePayment', [GlobalPaymentController::class, 'SchedulePayment']);
 
     Route::post('CreateSales', [Finance::class, 'CreateSales']);
+    Route::post('AuthorizeSales', [Finance::class, 'AuthorizeSales']);
     Route::post('ViewSales', [Finance::class, 'ViewSales']);
+    Route::post('ViewSalesDetails', [Finance::class, 'ViewSalesDetails']);
+
     Route::post('ViewOneSale', [Finance::class, 'ViewOneSale']);
     Route::post('RegenerateTransactionId', [Finance::class, 'RegenerateTransactionId']);
 
@@ -160,6 +193,43 @@ Route::post('ViewAdminOurProcess', [Websites::class, 'ViewAdminOurProcess']);
 Route::post('ViewAdminOurPortfolioHeader', [Websites::class, 'ViewAdminOurPortfolioHeader']);
 
 
+
+
+/*Partner Dashboard */
+
+Route::post('ViewTotalSalesPD', [PartnerDashBoard::class, 'ViewTotalPendingSales']);
+Route::post('ViewPendingSalesPD', [PartnerDashBoard::class, 'ViewPendingSales']);
+Route::post('ViewTotalApprovedSales', [PartnerDashBoard::class, 'ViewTotalApprovedSales']);
+
+
+
+
+Route::post('ViewTotalExpensesPD', [PartnerDashBoard::class, 'ViewTotalExpenses']);
+Route::post('ViewTotalYearlySalesPD', [PartnerDashBoard::class, 'ViewTotalYearlySales']);
+Route::post('ViewMonthlySalesAndExpensesPD', [PartnerDashBoard::class, 'ViewMonthlySalesAndExpenses']);
+Route::post('ViewTotalSalesForCurrentMonthPD', [PartnerDashBoard::class, 'ViewTotalSalesForCurrentMonth']);
+Route::post('ThisYearSalesPD', [PartnerDashBoard::class, 'ThisYearSales']);
+Route::post('TotalCustomersPD', [PartnerDashBoard::class, 'TotalCustomers']);
+Route::post('EarningDataPD', [PartnerDashBoard::class, 'EarningData']);
+Route::post('RecentTransactionPD', [PartnerDashBoard::class, 'RecentTransaction']);
+Route::post('YearlyContinentPD', [PartnerDashBoard::class, 'YearlyContinent']);
+Route::post('WeeklyStatsPD', [PartnerDashBoard::class, 'WeeklyStats']);
+Route::post('TopCustomersPD', [PartnerDashBoard::class, 'TopCustomers']);
+Route::post('TopTrendingPortfolioPD', [PartnerDashBoard::class, 'TopTrendingPortfolio']);
+Route::post('AuditingPD', [PartnerDashBoard::class, 'Auditing']);
+Route::post('GetVisitorsPD', [PartnerDashBoard::class, 'GetVisitors']);
+Route::post('CountVisitorsPD', [PartnerDashBoard::class, 'CountVisitors']);
+Route::post('CountCountryVisitorsPD', [PartnerDashBoard::class, 'CountCountryVisitors']);
+
+
+
+Route::post('UpdatePartner', [PartnerController::class, 'UpdatePartner']);
+Route::post('EditPartner', [PartnerController::class, 'EditPartner']);
+Route::post('ViewSinglePartner', [PartnerController::class, 'ViewSinglePartner']);
+Route::post('ViewAllPartner', [PartnerController::class, 'ViewAllPartner']);
+Route::post('DeletePartner', [PartnerController::class, 'DeletePartner']);
+Route::post('UnBlockPartner', [PartnerController::class, 'UnBlockPartner']);
+Route::post('BlockPartner', [PartnerController::class, 'BlockPartner']);
 
 
 

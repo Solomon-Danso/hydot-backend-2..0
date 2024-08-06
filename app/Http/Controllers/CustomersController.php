@@ -67,6 +67,7 @@ class CustomersController extends Controller
         $s->Email = $req->Email;
     }
 
+    $s->Created_By = $req->AdminId;
 
 
     $saver = $s->save();
@@ -186,6 +187,20 @@ function UpdateCustomers(Request $req){
 
 
     $this->audit->Auditor($req->AdminId, "Viewed All Customers");
+
+
+    return response()->json($s);
+}
+
+function ViewPartnerCustomers(Request $req) {
+    $s = Customers::where("Created_By", $req->AdminId)->orderBy("updated_at","desc")->get();
+
+    if ($s->isEmpty()) {
+        return response()->json(['message' => 'Customers not found'], 400);
+    }
+
+
+    $this->audit->PAuditor($req->AdminId, "Viewed Partner Customers");
 
 
     return response()->json($s);

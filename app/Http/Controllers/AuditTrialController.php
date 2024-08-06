@@ -8,6 +8,8 @@ use App\Models\SessionMgmt;
 use App\Models\AuditTrial;
 use App\Models\Visitors;
 use Illuminate\Support\Facades\Log;
+use App\Models\Partner;
+
 
 
 class AuditTrialController extends Controller
@@ -84,6 +86,79 @@ function Auditor($UserId, $Action) {
 
     $auditTrail->save();
 }
+
+function PAuditor($UserId, $Action) {
+    $ipAddress = $_SERVER['REMOTE_ADDR']; // Get user's IP address
+
+    try {
+        // Initialize cURL session
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, "https://ipinfo.io/{$ipAddress}/json");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $response = curl_exec($ch);
+
+        // Check if any error occurred
+        if (curl_errno($ch)) {
+            throw new \Exception('cURL error: ' . curl_error($ch));
+        }
+
+        // Close cURL session
+        curl_close($ch);
+
+        // Decode JSON response
+        $ipDetails = json_decode($response);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \Exception('JSON decoding error: ' . json_last_error_msg());
+        }
+
+        Log::info('The IP DETAILS:', (array)$ipDetails);
+
+        $country = $ipDetails->country ?? 'Unknown';
+        $city = $ipDetails->city ?? 'Unknown';
+        $location = $ipDetails->loc ?? ''; // Latitude and Longitude
+        $latitude = $location ? explode(',', $location)[0] : '';
+        $longitude = $location ? explode(',', $location)[1] : '';
+    } catch (\Exception $e) {
+        Log::error('Error in Auditor function: ' . $e->getMessage());
+        $country = $city = $latitude = $longitude = 'Unknown';
+    }
+
+    // Get user agent information
+    $userAgent = $_SERVER['HTTP_USER_AGENT'];
+
+    // Parse the user agent string to determine device and OS
+    $device = $this->detectDevice($userAgent);
+    $os = $this->detectOperatingSystem($userAgent);
+
+    // URL path
+    $urlPath = $_SERVER['REQUEST_URI'];
+
+    $stu = Partner::where('UserId', $UserId)->first();
+    if ($stu == null) {
+        return response()->json(["message" => "Admin does not exist"], 400);
+    }
+
+    $googleMapsLink = $latitude && $longitude ? "https://maps.google.com/?q={$latitude},{$longitude}" : '';
+
+    // Create a new AuditTrail instance and save the log to the database
+    $auditTrail = new AuditTrial();
+    $auditTrail->ipAddress = $ipAddress ?? " ";
+    $auditTrail->country = $country ?? " ";
+    $auditTrail->city = $city ?? " ";
+    $auditTrail->device = $device ?? " ";
+    $auditTrail->os = $os ?? " ";
+    $auditTrail->urlPath = $urlPath ?? " ";
+    $auditTrail->action = $Action ?? " ";
+    $auditTrail->googlemap = $googleMapsLink ?? " ";
+    $auditTrail->userId = $stu->UserId ?? " ";
+    $auditTrail->userName = $stu->Name;
+    $auditTrail->userPic = $stu->Picture ?? " ";
+    $auditTrail->companyId = $stu->UserId ?? " ";
+
+    $auditTrail->save();
+}
+
 
 
  public function Visitors() {

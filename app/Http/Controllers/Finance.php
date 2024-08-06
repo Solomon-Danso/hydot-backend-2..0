@@ -14,6 +14,8 @@ use Carbon\Carbon;
 use App\Models\Expenses;
 use App\Mail\PaymentInvoice;
 use Illuminate\Support\Facades\Log;
+use App\Mail\HydotPay;
+use App\Models\Partner;
 
 
 class Finance extends Controller
@@ -30,8 +32,9 @@ class Finance extends Controller
 
 
 
+
     function CreateSales(Request $req) {
-        $a = AdminUser::where('UserId', $req->AdminId)->first();
+        $a = Partner::where('UserId', $req->AdminId)->first();
         $c = Customers::where('UserId', $req->CustomerId)->first();
         $p = PriceConfiguration::where('ProductId', $req->ProductId)->first();
 
@@ -47,75 +50,77 @@ class Finance extends Controller
             return response()->json(['message' => 'Product not found'], 400);
         }
 
-        $currentDate = Carbon::now();
-        $newSubscriptionDays = ceil($req->Amount / $p->Amount);
-
-        $existingToken = Sales::where('CustomerId', $c->UserId)
-                      ->where('ProductId', $p->ProductId)
-                      ->orderBy('created_at', 'desc')
-                      ->first();
-
-
-        if ($existingToken) {
-           // return response()->json(['message' => 'Token Exist'], 400);
-            Log::info('Existing token found:');
-            Log::info($existingToken);
-
-            $existingExpireDate = Carbon::parse($existingToken->ExpireDate);
-            Log::info('existingExpireDate:');
-            Log::info($existingExpireDate);
-
-            $existingRemainingDays = $currentDate->diffInDays($existingExpireDate);
-            Log::info('Existing RemainDays:');
-            Log::info($existingRemainingDays);
-
-            Log::info('newSubscriptionDays');
-            Log::info($newSubscriptionDays);
-            if($existingRemainingDays<0){
-                $existingRemainingDays = 0;
-            }
-
-            $expireDate = $currentDate->addDays($existingRemainingDays+$newSubscriptionDays); // Extend expiry date by 500 days
-
-        } else {
-            $expireDate = $currentDate->copy()->addDays($newSubscriptionDays);
-        }
 
         // Create a new sales record
         $s = new Sales();
-        $s->Created_By_Id = $req->AdminId;
+        $s->Created_By_Id = $a->UserId;
         $s->Created_By_Name = $a->Name;
-        $s->TransactionId = $this->TokenGenerator();
+        $s->TransactionId = $this->IdGenerator();
         $s->ProductId = $p->ProductId;
         $s->ProductName = $p->ProductName;
         $s->CustomerId = $c->UserId;
         $s->CustomerName = $c->Name;
         $s->PricingType = $p->PricingType;
-        $s->Amount = $req->Amount;
-        $s->SubscriptionPeriodInDays = $newSubscriptionDays;
-        $s->StartDate = Carbon::now();
-        $s->SystemDate = Carbon::now();
-        $s->ExpireDate = $expireDate;
+        $s->Amount = $p->Amount;
+        $s->PaymentReference = "Payment for product ".$p->ProductName;
 
-        if ($req->filled('PaymentMethod')) {
-            $s->PaymentMethod = $req->PaymentMethod;
+
+        $saver = $s->save();
+
+        if($saver){
+
+            $message =  $s->ProductName . " assigned to " . $s->CustomerName . ", awaiting authorization ";
+            //$this->audit->Auditor($req->AdminId, $message);
+            return response()->json(["message" => $message], 200);
+
+
+        }else{
+            return response()->json(["message" => "Failed to schedule payment"], 400);
         }
 
-        if ($req->filled('PaymentReference')) {
-            $s->PaymentReference = $req->PaymentReference;
+
+
+
+    }
+
+
+
+
+    function AuthorizeSales(Request $req) {
+        $a = AdminUser::where('UserId', $req->AdminId)->first();
+
+        $s = Sales::where('TransactionId', $req->TransactionId)->first();
+
+        if ($a == null) {
+            return response()->json(['message' => 'Admin not found'], 400);
         }
+
+        if ($s == null) {
+            return response()->json(['message' => 'Sales not found'], 400);
+        }
+
+        $c = Customers::where('UserId', $s->CustomerId)->first();
+
+        if ($c == null) {
+            return response()->json(['message' => 'Customer not found'], 400);
+        }
+
+
+
+        $s->Approved_By_Id = $a->AdminId;
+        $s->Approved_By_Name = $a->Name;
 
         $saver = $s->save();
 
         if ($saver) {
-            $message = $c->Name . " made a payment of " . $req->Amount . " for " . $p->ProductName;
+            Mail::to($c->Email)->send(new HydotPay($s));
+
+            $message = "Scheduled payment for ".$s->CustomerName;
             $this->audit->Auditor($req->AdminId, $message);
-            try {
-                Mail::to($c->Email)->send(new PaymentInvoice($s));
-                return response()->json(["message" => "Payment made Successfully"], 200);
-            } catch (\Exception $e) {
-                return response()->json(["message" => "Email Failed To Send"], 400);
-            }
+
+
+            return response()->json(["message" => $message], 200);
+
         } else {
             return response()->json(["Request" => "Failed"], 400);
         }
@@ -125,13 +130,164 @@ class Finance extends Controller
 
 
 
+
+
+
+    // function CreateSales(Request $req) {
+    //     $a = AdminUser::where('UserId', $req->AdminId)->first();
+    //     $c = Customers::where('UserId', $req->CustomerId)->first();
+    //     $p = PriceConfiguration::where('ProductId', $req->ProductId)->first();
+
+    //     if ($a == null) {
+    //         return response()->json(['message' => 'Admin not found'], 400);
+    //     }
+
+    //     if ($c == null) {
+    //         return response()->json(['message' => 'Customer not found'], 400);
+    //     }
+
+    //     if ($p == null) {
+    //         return response()->json(['message' => 'Product not found'], 400);
+    //     }
+
+    //     $currentDate = Carbon::now();
+    //     $newSubscriptionDays = ceil($req->Amount / $p->Amount);
+
+    //     $existingToken = Sales::where('CustomerId', $c->UserId)
+    //                   ->where('ProductId', $p->ProductId)
+    //                   ->orderBy('created_at', 'desc')
+    //                   ->first();
+
+
+    //     if ($existingToken) {
+    //        // return response()->json(['message' => 'Token Exist'], 400);
+    //         Log::info('Existing token found:');
+    //         Log::info($existingToken);
+
+    //         $existingExpireDate = Carbon::parse($existingToken->ExpireDate);
+    //         Log::info('existingExpireDate:');
+    //         Log::info($existingExpireDate);
+
+    //         $existingRemainingDays = $currentDate->diffInDays($existingExpireDate);
+    //         Log::info('Existing RemainDays:');
+    //         Log::info($existingRemainingDays);
+
+    //         Log::info('newSubscriptionDays');
+    //         Log::info($newSubscriptionDays);
+    //         if($existingRemainingDays<0){
+    //             $existingRemainingDays = 0;
+    //         }
+
+    //         $expireDate = $currentDate->addDays($existingRemainingDays+$newSubscriptionDays); // Extend expiry date by 500 days
+
+    //     } else {
+    //         $expireDate = $currentDate->copy()->addDays($newSubscriptionDays);
+    //     }
+
+    //     // Create a new sales record
+    //     $s = new Sales();
+    //     $s->Created_By_Id = $req->AdminId;
+    //     $s->Created_By_Name = $a->Name;
+    //     $s->TransactionId = $this->TokenGenerator();
+    //     $s->ProductId = $p->ProductId;
+    //     $s->ProductName = $p->ProductName;
+    //     $s->CustomerId = $c->UserId;
+    //     $s->CustomerName = $c->Name;
+    //     $s->PricingType = $p->PricingType;
+    //     $s->Amount = $req->Amount;
+    //     $s->SubscriptionPeriodInDays = $newSubscriptionDays;
+    //     $s->StartDate = Carbon::now();
+    //     $s->SystemDate = Carbon::now();
+    //     $s->ExpireDate = $expireDate;
+
+    //     if ($req->filled('PaymentMethod')) {
+    //         $s->PaymentMethod = $req->PaymentMethod;
+    //     }
+
+    //     if ($req->filled('PaymentReference')) {
+    //         $s->PaymentReference = $req->PaymentReference;
+    //     }
+
+    //     $saver = $s->save();
+
+    //     if ($saver) {
+    //         $message = $c->Name . " made a payment of " . $req->Amount . " for " . $p->ProductName;
+    //         $this->audit->Auditor($req->AdminId, $message);
+    //         try {
+    //             Mail::to($c->Email)->send(new PaymentInvoice($s));
+    //             return response()->json(["message" => "Payment made Successfully"], 200);
+    //         } catch (\Exception $e) {
+    //             return response()->json(["message" => "Email Failed To Send"], 400);
+    //         }
+    //     } else {
+    //         return response()->json(["Request" => "Failed"], 400);
+    //     }
+    // }
+
+
+
+
+
 function ViewSales(){
-        return Sales::get();
+        return Sales::orderBy("updated_at","desc")->get();
 }
+
+
 
 function ViewManualSales(){
     return Sales::where("IsApproved",true)->get();
 }
+
+function ViewSalesDetails(Request $req){
+
+    $s = Sales::where("TransactionId",$req->TransactionId)->first();
+    if($s==null){
+        return response()->json(["message" => "Sales not available"], 400);
+    }
+
+    $c = Customers::where("UserId", $s->CustomerId)->first();
+
+    if($c==null){
+        return response()->json(["message"=>"Customers not found"],400);
+    }
+
+    $a = AdminUser::where("UserId", $s->Created_By_Id)->first();
+
+    if($a==null){
+        return response()->json(["message"=>"Partner not found"],400);
+    }
+
+
+
+    $final = [
+    "Picture" => $c->Picture,
+    "Continent"=>$c->Continent,
+    "Country"=>$c->Country,
+    "Name"=>$c->Name,
+    "Location"=>$c->Location,
+    "Phone"=>$c->Phone,
+    "Email"=>$c->Email,
+
+    "PartnerId" => $a->UserId,
+    "PartnerPicture" => $a->Picture,
+    "PartnerName"=>$a->Name,
+    "PartnerEmail"=>$a->Email,
+    "PartnerPhone"=>$a->Phone,
+    "PartnerContinent"=>$a->Continent,
+    "PartnerCountry"=>$a->Country,
+    "PartnerLocation"=>$a->Location,
+
+
+
+
+    ];
+
+    return $final;
+
+
+
+}
+
 
 function ViewOneSale(Request $req){
     $s = Sales::where("TransactionId",$req->TransactionId)->first();
@@ -162,9 +318,9 @@ function ViewOneSale(Request $req){
 
     }
 
-
-
 }
+
+
 
 function RegenerateTransactionId(Request $req){
     $s = Sales::where('CustomerId', $req->CustomerId)->where('ProductId', $req->ProductId)->first();
@@ -344,7 +500,7 @@ function TokenGenerator(): string {
 
 
 function IdGenerator(): string {
-        $randomID = str_pad(mt_rand(1, 99999999), 30, '0', STR_PAD_LEFT);
+        $randomID = str_pad(mt_rand(1, 99999999), 15, '0', STR_PAD_LEFT);
         return $randomID;
 }
 
