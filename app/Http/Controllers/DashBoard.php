@@ -386,29 +386,30 @@ function YearlyContinent() {
     return response()->json($formattedData);
 }
 
-function WeeklyStats() {
+public function WeeklyStats()
+{
     // Calculate the start and end of the current week (Monday to Sunday)
     $startOfWeek = Carbon::now()->startOfWeek()->format('Y-m-d');
     $endOfWeek = Carbon::now()->endOfWeek()->format('Y-m-d');
 
     // Query for the top seller (product with the highest sales revenue)
-    $topSeller = Sales::select('ProductId', DB::raw('SUM(amount) AS total_sales'))
+    $topSeller = Sales::select('Created_By_Id', 'Created_By_Name', DB::raw('SUM(amount) AS total_sales'))
         ->whereBetween('updated_at', [$startOfWeek, $endOfWeek])
-        ->groupBy('ProductId')
+        ->groupBy('Created_By_Id', 'Created_By_Name')
         ->orderByDesc('total_sales')
         ->first();
 
     // Query for the most viewed product
-    $mostViewed = Sales::select('ProductId', DB::raw('COUNT(ProductId) AS total_views'))
+    $mostViewed = Sales::select('ProductName', DB::raw('COUNT(ProductName) AS total_views'))
         ->whereBetween('updated_at', [$startOfWeek, $endOfWeek])
-        ->groupBy('ProductId')
+        ->groupBy('ProductName')
         ->orderByDesc('total_views')
         ->first();
 
     // Query for the top engaged product (both high sales revenue and high number of views)
-    $topEngaged = Sales::select('ProductId', DB::raw('SUM(amount) AS total_sales, COUNT(ProductId) AS total_views'))
+    $topEngaged = Sales::select('ProductName', DB::raw('SUM(amount) AS total_sales, COUNT(ProductName) AS total_views'))
         ->whereBetween('updated_at', [$startOfWeek, $endOfWeek])
-        ->groupBy('ProductId')
+        ->groupBy('ProductName')
         ->orderByDesc('total_sales')
         ->orderByDesc('total_views')
         ->first();
@@ -417,25 +418,25 @@ function WeeklyStats() {
     $weeklyStats = [
         [
             'icon' => 'FiShoppingCart', // Add appropriate icon
-            'amount' => $topSeller ? number_format($topSeller->total_sales) : 'N/A',
-            'title' => 'Top Seller',
-            'desc' => 'Highest Revenue Product',
+            'amount' => $topSeller ? "₵".number_format(0.1 * $topSeller->total_sales) : 'N/A',
+            'title' => $topSeller ? $topSeller->Created_By_Name." (ID: ".$topSeller->Created_By_Id." )" : 'N/A',
+            'desc' => 'Top Seller of this week',
             'iconBg' => '#FB9678', // Add appropriate background color
             'pcColor' => 'green-600', // Add appropriate color
         ],
         [
             'icon' => 'GiSunkenEye', // Add appropriate icon
             'amount' => $mostViewed ? number_format($mostViewed->total_views) : 'N/A',
-            'title' => 'Most Viewed',
-            'desc' => 'Most Viewed Product',
+            'title' => $mostViewed ? $mostViewed->ProductName : 'N/A',
+            'desc' => 'Most Viewed Product of this week',
             'iconBg' => 'rgb(254, 201, 15)', // Add appropriate background color
             'pcColor' => 'green-600', // Add appropriate color
         ],
         [
             'icon' => 'BsChatLeft', // Add appropriate icon
             'amount' => $topEngaged ? number_format($topEngaged->total_views) : 'N/A',
-            'title' => 'Top Engaged',
-            'desc' => 'Most Engaging Product',
+            'title' => $topEngaged ? $topEngaged->ProductName : 'N/A',
+            'desc' => 'Most Engaging Product of this week',
             'iconBg' => '#00C292', // Add appropriate background color
             'pcColor' => 'green-600', // Add appropriate color
         ],
@@ -443,6 +444,7 @@ function WeeklyStats() {
 
     return response()->json(['weeklyStats' => $weeklyStats]);
 }
+
 
 function TopCustomers() {
     // Query to fetch the top 3 customers with the highest amount paid in the Sales table

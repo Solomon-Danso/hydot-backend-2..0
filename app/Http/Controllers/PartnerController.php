@@ -87,7 +87,7 @@ function CreatePartner(Request $req){
 
         $message = $s->Name."  was added as a partner";
         $message2 = $s->Name."  is added as a partner";
-        $this->audit->Auditor($req->AdminId, $message);
+        //$this->audit->Auditor($req->AdminId, $message);
 
         try {
             Mail::to($s->Email)->send(new Partners_at_Hydottech($s, $rawPassword));

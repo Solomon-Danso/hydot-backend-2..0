@@ -75,7 +75,7 @@ class CustomersController extends Controller
 
         $message = $s->Name."  was added as an Customers";
         $message2 = $s->Name."  is added as an Customers";
-        $this->audit->Auditor($req->AdminId, $message);
+        //$this->audit->Auditor($req->AdminId, $message);
 
         try {
             Mail::to($s->Email)->send(new CustomersRegistration($s));
