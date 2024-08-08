@@ -267,12 +267,13 @@
                                                                                                                     <span style="font-size: 36px; line-height: 43px;">
                                                                                                                         <strong>
                                                                                                                             <span style="line-height: 43px; font-size: 36px;">GHS
-                                                                                                                                {{ $Sales->Amount }}
+                                                                                                                                {{ number_format($Sales->Amount, 2) }}
                                                                                                                             </span>
                                                                                                                         </strong>
                                                                                                                     </span>
                                                                                                                     <br>
                                                                                                                 </p>
+
                                                                                                             </div>
                                                                                                         </div>
                                                                                                     </td>
