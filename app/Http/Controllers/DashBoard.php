@@ -16,7 +16,7 @@ use App\Models\Visitors;
 class DashBoard extends Controller
 {
 
-
+ 
     function ViewTotalSales() {
         $totalSales = Sales::sum('Amount');
         return response()->json(['sales' => $totalSales]);
@@ -242,7 +242,7 @@ function EarningData() {
         ],
         [
             'icon' => 'FiBarChart',
-            'amount' => '₵' . $formattedCurrentYearSales,
+            'amount' => '₵' .number_format( $formattedCurrentYearSales),
             'percentage' => $salesPercentage,
             'title' => 'Sales',
             'iconColor' => 'rgb(228, 106, 118)',
@@ -251,7 +251,7 @@ function EarningData() {
         ],
         [
             'icon' => 'HiOutlineRefresh',
-            'amount' => '₵' . $formattedCurrentYearExpenses,
+            'amount' => '₵' . number_format($formattedCurrentYearExpenses),
             'percentage' => $expensesPercentage,
             'title' => 'Expenses',
             'iconColor' => 'rgb(0, 194, 146)',

@@ -251,7 +251,7 @@ function ViewSalesDetails(Request $req){
         return response()->json(["message"=>"Customers not found"],400);
     }
 
-    $a = AdminUser::where("UserId", $s->Created_By_Id)->first();
+    $a = Partner::where("UserId", $s->Created_By_Id)->first();
 
     if($a==null){
         return response()->json(["message"=>"Partner not found"],400);
