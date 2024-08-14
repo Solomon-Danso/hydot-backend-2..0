@@ -16,6 +16,7 @@ use App\Http\Controllers\GlobalPaymentController;
 use App\Http\Controllers\PartnerDashBoard;
 use App\Http\Controllers\PartnerAuthentication;
 use App\Http\Controllers\PartnerController;
+use App\Http\Controllers\OnBoardingController;
 
 // Route for setting up the admin, accessible without authentication
 Route::post('SetUpCreateAdmin', [AdminUserController::class, 'SetUpCreateAdmin']);
@@ -231,6 +232,33 @@ Route::post('DeletePartner', [PartnerController::class, 'DeletePartner']);
 Route::post('UnBlockPartner', [PartnerController::class, 'UnBlockPartner']);
 Route::post('BlockPartner', [PartnerController::class, 'BlockPartner']);
 
+
+//Onboarding Steps
+Route::post('OnBoard', [OnBoardingController::class, 'OnBoard']);
+Route::post('GetStep1Members', [OnBoardingController::class, 'GetStep1Members']);
+Route::post('ScheduleMeeting', [OnBoardingController::class, 'ScheduleMeeting']);
+Route::post('FirstMeeting', [OnBoardingController::class, 'FirstMeeting']);
+Route::post('CompleteStep1', [OnBoardingController::class, 'CompleteStep1']);
+Route::post('GetStep2Members', [OnBoardingController::class, 'GetStep2Members']);
+Route::post('MOUAgreement', [OnBoardingController::class, 'MOUAgreement']);
+Route::post('DomainAndHosting', [OnBoardingController::class, 'DomainAndHosting']);
+Route::post('PaymentCompleted', [OnBoardingController::class, 'PaymentCompleted']);
+Route::post('CompleteStep2', [OnBoardingController::class, 'CompleteStep2']);
+
+Route::post('GetStep3Members', [OnBoardingController::class, 'GetStep3Members']);
+Route::post('SoftwareUpload', [OnBoardingController::class, 'SoftwareUpload']);
+Route::post('ThirdPartyServices', [OnBoardingController::class, 'ThirdPartyServices']);
+Route::post('Testing', [OnBoardingController::class, 'Testing']);
+Route::post('CompleteStep3', [OnBoardingController::class, 'CompleteStep3']);
+Route::post('GetStep4Members', [OnBoardingController::class, 'GetStep4Members']);
+Route::post('UserManual', [OnBoardingController::class, 'UserManual']);
+Route::post('MOUSignature', [OnBoardingController::class, 'MOUSignature']);
+Route::post('CompleteStep4', [OnBoardingController::class, 'CompleteStep4']);
+Route::post('GetFinalMembers', [OnBoardingController::class, 'GetFinalMembers']);
+
+Route::post('DeBoard', [OnBoardingController::class, 'DeBoard']);
+Route::post('GetAllDeBoard', [OnBoardingController::class, 'GetAllDeBoard']);
+Route::post('OnBoardFromDeBoard', [OnBoardingController::class, 'OnBoardFromDeBoard']);
 
 
 

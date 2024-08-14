@@ -10,6 +10,7 @@ use App\Models\OnBoarding;
 use App\Models\Sales;
 use App\Models\Meetings;
 use App\Mail\Meeting;
+use App\Models\DeBoarding;
 
 
 class OnBoardingController extends Controller
@@ -70,8 +71,7 @@ class OnBoardingController extends Controller
     }
 
     public function GetStep1Members(Request $req){
-        $s = OnBoarding::where("TransactionId",$req->TransactionId)
-        ->where("Step1Completed",false)
+        $s = OnBoarding::where("Step1Completed",false)
         ->get();
         return $s;
     }
@@ -194,8 +194,7 @@ class OnBoardingController extends Controller
 
 
     public function GetStep2Members(Request $req){
-        $s = OnBoarding::where("TransactionId",$req->TransactionId)
-        ->where("Step2Completed",false)
+        $s = OnBoarding::where("Step2Completed",false)
         ->get();
         return $s;
     }
@@ -372,8 +371,7 @@ class OnBoardingController extends Controller
 
 
     public function GetStep3Members(Request $req){
-        $s = OnBoarding::where("TransactionId",$req->TransactionId)
-        ->where("Step3Completed",false)
+        $s = OnBoarding::where("Step3Completed",false)
         ->get();
         return $s;
     }
@@ -525,8 +523,7 @@ class OnBoardingController extends Controller
 
 
     public function GetStep4Members(Request $req){
-        $s = OnBoarding::where("TransactionId",$req->TransactionId)
-        ->where("Step4Completed",false)
+        $s = OnBoarding::where("Step4Completed",false)
         ->get();
         return $s;
     }
@@ -632,7 +629,7 @@ class OnBoardingController extends Controller
         }
 
 
-        
+
 
 
 
@@ -660,15 +657,101 @@ class OnBoardingController extends Controller
     }
 
     public function GetFinalMembers(Request $req){
-        $s = OnBoarding::where("TransactionId",$req->TransactionId)
-        ->where("Step4Completed",true)
+        $s = OnBoarding::where("Step4Completed",true)
         ->get();
         return $s;
     }
 
 
+    public function DeBoard(Request $req){
+
+        $c = OnBoarding::where("TransactionId",$req->TransactionId)->first();
+        if(!$c){
+            return response()->json(["message"=>"Sales not found"],400);
+        }
 
 
+
+        $s = new DeBoarding();
+        $s->Created_By_Id =  $c->Created_By_Id;
+        $s->Created_By_Name = $c->Created_By_Name;
+        $s->TransactionId =   $c->TransactionId;
+        $s->ProductId = $c->ProductId;
+        $s->ProductName = $c->ProductName;
+        $s->CustomerId = $c->CustomerId;
+        $s->CustomerName = $c->CustomerName;
+        $s->CustomerEmail = $c->CustomerEmail;
+        $s->PricingType = $c->PricingType;
+        $s->Amount = $c->Amount;
+        $s->PaymentReference = $c->PaymentReference;
+
+
+        $saver = $s->save();
+
+        if($saver){
+            $c->delete();
+            $resMessage ="Deboarding Initialized for  ".$c->CustomerName.",  ";
+            $adminMessage = "Completed Deboarding initialization for ".$c->CustomerName;
+            $this->audit->Auditor($req->AdminId, $adminMessage);
+
+            return response()->json(["message" => $resMessage], 200);
+
+
+        }else{
+            return response()->json(["message" => "Failed to initialize deboarding"], 400);
+        }
+
+
+
+    }
+
+
+    public function GetAllDeBoard(Request $req){
+        $s = DeBoarding::get();
+        return $s;
+    }
+
+    public function OnBoardFromDeBoard(Request $req){
+
+        $c = DeBoarding::where("TransactionId",$req->TransactionId)->first();
+        if(!$c){
+            return response()->json(["message"=>"Sales not found"],400);
+        }
+
+
+
+        $s = new OnBoarding();
+        $s->Created_By_Id =  $c->Created_By_Id;
+        $s->Created_By_Name = $c->Created_By_Name;
+        $s->TransactionId =   $c->TransactionId;
+        $s->ProductId = $c->ProductId;
+        $s->ProductName = $c->ProductName;
+        $s->CustomerId = $c->CustomerId;
+        $s->CustomerName = $c->CustomerName;
+        $s->CustomerEmail = $c->CustomerEmail;
+        $s->PricingType = $c->PricingType;
+        $s->Amount = $c->Amount;
+        $s->PaymentReference = $c->PaymentReference;
+
+
+        $saver = $s->save();
+
+        if($saver){
+            $c->delete();
+            $resMessage ="Onboarding Initialized for  ".$c->CustomerName.",  ";
+            $adminMessage = "Completed Onboarding initialization for ".$c->CustomerName;
+            $this->audit->Auditor($req->AdminId, $adminMessage);
+
+            return response()->json(["message" => $resMessage], 200);
+
+
+        }else{
+            return response()->json(["message" => "Failed to initialize Onboarding"], 400);
+        }
+
+
+
+    }
 
 
 
