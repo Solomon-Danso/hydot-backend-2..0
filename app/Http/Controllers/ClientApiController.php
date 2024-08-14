@@ -5,9 +5,18 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\ClientApi;
 use App\Models\Customers;
+use App\Http\Controllers\AuditTrialController;
 
 class ClientApiController extends Controller
 {
+    protected $audit;
+
+    public function __construct(AuditTrialController $auditTrialController)
+    {
+        $this->audit = $auditTrialController;
+
+    }
+
     function CreateClientApiServerURL(Request $req){
 
         $s = Customers::where('UserId', $req->CustomerId)->first();

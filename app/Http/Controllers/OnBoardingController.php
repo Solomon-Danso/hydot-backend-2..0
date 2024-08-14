@@ -11,6 +11,7 @@ use App\Models\Sales;
 use App\Models\Meetings;
 use App\Mail\Meeting;
 use App\Models\DeBoarding;
+use App\Mail\HydotPay;
 
 
 class OnBoardingController extends Controller
@@ -54,6 +55,8 @@ class OnBoardingController extends Controller
         $saver = $s->save();
 
         if($saver){
+            $c->IsOnboardClicked = true;
+            $c->save();
 
             $resMessage ="Onboarding Initialized for  ".$c->CustomerName.",  awaiting first meeting";
             $adminMessage = "Completed Onboarding initialization for ".$c->CustomerName;
@@ -78,38 +81,26 @@ class OnBoardingController extends Controller
 
     public function ScheduleMeeting(Request $req){
 
-        $c = OnBoarding::where("TransactionId",$req->TransactionId)->first();
-        if(!$c){
-            return response()->json(["message"=>"Customer not found"],400);
-        }
+
 
         $s = new Meetings();
-
-        $s->Created_By_Id =  $c->Created_By_Id;
-        $s->Created_By_Name = $c->Created_By_Name;
-        $s->TransactionId =   $c->TransactionId;
-        $s->ProductId = $c->ProductId;
-        $s->ProductName = $c->ProductName;
-        $s->CustomerId = $c->CustomerId;
-        $s->CustomerName = $c->CustomerName;
-        $s->CustomerEmail = $c->CustomerEmail;
-
-
-        $fields = ["MeetingLink", "StartDate", "StartTime"];
+        $fields = ["Name","Email", "Link","Time","Reason"];
 
         foreach($fields as $field){
             if($req->filled($field)){
-                $s->field = $req->field;
+                $s->$field = $req->$field;
             }
         }
 
 
+
+
         $saver = $s->save();
         if($saver){
-            Mail::to($s->CustomerEmail)->send(new Meeting($s));
+            Mail::to($s->Email)->send(new Meeting($s));
 
-            $resMessage ="Meeting with ".$s->CustomerName." scheduled successfully";
-            $adminMessage = "Scheduled Meeting with ".$s->CustomerName;
+            $resMessage ="Meeting with ".$s->Name." scheduled successfully";
+            $adminMessage = "Scheduled Meeting with ".$s->Name;
             $this->audit->Auditor($req->AdminId, $adminMessage);
 
             return response()->json(["message"=>$resMessage],200);
@@ -122,6 +113,13 @@ class OnBoardingController extends Controller
 
 
 
+
+    }
+
+    public function GetAllMeeting(Request $req){
+
+        $s = Meetings::orderBy("created_at", "desc")->get();
+        return $s;
 
     }
 
@@ -264,7 +262,12 @@ class OnBoardingController extends Controller
     function AuthorizePayment($AdminId,$TransactionId ) {
 
 
-        $s = OnBoarding::where("TransactionId",$req->TransactionId)->first();
+        $c = Sales::where("TransactionId",$TransactionId)->first();
+        if(!$c){
+            return response()->json(["message"=>"Customer not found"],400);
+        }
+
+        $s = OnBoarding::where("TransactionId",$TransactionId)->first();
         if(!$s){
             return response()->json(["message"=>"Customer not found"],400);
         }
@@ -273,10 +276,10 @@ class OnBoardingController extends Controller
         $saver = $s->save();
 
         if ($saver) {
-            Mail::to($s->CustomerEmail)->send(new HydotPay($s));
+            Mail::to($s->CustomerEmail)->send(new HydotPay($c));
 
             $message = "Scheduled payment for ".$s->CustomerName;
-            $this->audit->Auditor($req->AdminId, $message);
+            $this->audit->Auditor($AdminId, $message);
 
 
             return response()->json(["message" => $message], 200);
@@ -707,7 +710,7 @@ class OnBoardingController extends Controller
 
 
     public function GetAllDeBoard(Request $req){
-        $s = DeBoarding::get();
+        $s = DeBoarding::orderBy("created_at","desc")->get();
         return $s;
     }
 

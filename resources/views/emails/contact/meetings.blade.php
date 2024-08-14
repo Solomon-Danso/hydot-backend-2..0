@@ -306,8 +306,8 @@
                                                                                                         <div style="color:#555555;line-height:120%;font-family:-apple-system, BlinkMacSystemFont, &#039;Segoe UI&#039;, &#039;Roboto&#039;, &#039;Oxygen&#039;, &#039;Ubuntu&#039;, &#039;Cantarell&#039;, &#039;Fira Sans&#039;, &#039;Droid Sans&#039;, &#039;Helvetica Neue&#039;, sans-serif;">
                                                                                                             <div style="font-size:14px;line-height:17px;text-align:left;color:#555555;font-family:-apple-system, BlinkMacSystemFont, &#039;Segoe UI&#039;, &#039;Roboto&#039;, &#039;Oxygen&#039;, &#039;Ubuntu&#039;, &#039;Cantarell&#039;, &#039;Fira Sans&#039;, &#039;Droid Sans&#039;, &#039;Helvetica Neue&#039;, sans-serif;padding-top: 15px;padding-right: 10px;padding-bottom: 15px;padding-left: 10px;border-bottom: solid 1px #EDEDED;">
                                                                                                                 <p style="margin: 0;font-size: 14px;line-height: 17px;text-align: left">
-                                                                                                                    Username&nbsp;
-                                                                                                                    <strong style="float:right">{{ $Sales->CustomerName }}</strong>
+                                                                                                                    Name&nbsp;
+                                                                                                                    <strong style="float:right">{{ $Sales->Name }}</strong>
                                                                                                                     <br>
                                                                                                                 </p>
                                                                                                             </div>
@@ -319,27 +319,15 @@
                                                                                                         <div style="color:#555555;line-height:120%;font-family:-apple-system, BlinkMacSystemFont, &#039;Segoe UI&#039;, &#039;Roboto&#039;, &#039;Oxygen&#039;, &#039;Ubuntu&#039;, &#039;Cantarell&#039;, &#039;Fira Sans&#039;, &#039;Droid Sans&#039;, &#039;Helvetica Neue&#039;, sans-serif;">
                                                                                                             <div style="font-size:14px;line-height:17px;text-align:left;color:#555555;font-family:-apple-system, BlinkMacSystemFont, &#039;Segoe UI&#039;, &#039;Roboto&#039;, &#039;Oxygen&#039;, &#039;Ubuntu&#039;, &#039;Cantarell&#039;, &#039;Fira Sans&#039;, &#039;Droid Sans&#039;, &#039;Helvetica Neue&#039;, sans-serif;border-bottom: solid 1px #EDEDED;padding-top: 15px;padding-right: 10px;padding-bottom: 15px;padding-left: 10px;">
                                                                                                                 <p style="margin: 0;font-size: 14px;line-height: 17px;text-align: left">
-                                                                                                                    Product&nbsp;
-                                                                                                                    <strong style="float:right">{{ $Sales->ProductName }}</strong>
+                                                                                                                    Reason&nbsp;
+                                                                                                                    <strong style="float:right">{{ $Sales->Reason }}</strong>
                                                                                                                     <br>
                                                                                                                 </p>
                                                                                                             </div>
                                                                                                         </div>
                                                                                                     </td>
                                                                                                 </tr>
-                                                                                                <tr style="vertical-align: top">
-                                                                                                    <td style="word-break: break-word;border-collapse: collapse !important;vertical-align: top;padding-top: 0;padding-right: 20px;padding-bottom: 0;padding-left: 20px;">
-                                                                                                        <div style="color:#555555;line-height:120%;font-family:-apple-system, BlinkMacSystemFont, &#039;Segoe UI&#039;, &#039;Roboto&#039;, &#039;Oxygen&#039;, &#039;Ubuntu&#039;, &#039;Cantarell&#039;, &#039;Fira Sans&#039;, &#039;Droid Sans&#039;, &#039;Helvetica Neue&#039;, sans-serif;">
-                                                                                                            <div style="font-size:14px;line-height:17px;text-align:left;color:#555555;font-family:-apple-system, BlinkMacSystemFont, &#039;Segoe UI&#039;, &#039;Roboto&#039;, &#039;Oxygen&#039;, &#039;Ubuntu&#039;, &#039;Cantarell&#039;, &#039;Fira Sans&#039;, &#039;Droid Sans&#039;, &#039;Helvetica Neue&#039;, sans-serif;padding-top: 15px;padding-right: 10px;padding-bottom: 15px;padding-left: 10px;">
-                                                                                                                <p style="margin: 0;font-size: 14px;line-height: 17px;text-align: left">
-                                                                                                                    Organizer&nbsp;
-                                                                                                                    <strong style="float:right">{{ $Sales->Created_By_Name }}</strong>
-                                                                                                                    <br>
-                                                                                                                </p>
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                    </td>
-                                                                                                </tr>
+
 
                                                                                                 <tr style="vertical-align: top">
                                                                                                     <td style="word-break: break-word;border-collapse: collapse !important;vertical-align: top;padding-top: 0;padding-right: 20px;padding-bottom: 0;padding-left: 20px;">
@@ -347,7 +335,7 @@
                                                                                                             <div style="font-size:14px;line-height:17px;text-align:left;color:#555555;font-family:-apple-system, BlinkMacSystemFont, &#039;Segoe UI&#039;, &#039;Roboto&#039;, &#039;Oxygen&#039;, &#039;Ubuntu&#039;, &#039;Cantarell&#039;, &#039;Fira Sans&#039;, &#039;Droid Sans&#039;, &#039;Helvetica Neue&#039;, sans-serif;padding-top: 15px;padding-right: 10px;padding-bottom: 15px;padding-left: 10px;">
                                                                                                                 <p style="margin: 0;font-size: 14px;line-height: 17px;text-align: left">
                                                                                                                     Date&nbsp;
-                                                                                                                    <strong style="float:right">{{ $Sales->StartDate }}</strong>
+                                                                                                                    <strong style="float:right">{{ $Sales->Time }}</strong>
                                                                                                                     <br>
                                                                                                                 </p>
                                                                                                             </div>
@@ -355,19 +343,7 @@
                                                                                                     </td>
                                                                                                 </tr>
 
-                                                                                                <tr style="vertical-align: top">
-                                                                                                    <td style="word-break: break-word;border-collapse: collapse !important;vertical-align: top;padding-top: 0;padding-right: 20px;padding-bottom: 0;padding-left: 20px;">
-                                                                                                        <div style="color:#555555;line-height:120%;font-family:-apple-system, BlinkMacSystemFont, &#039;Segoe UI&#039;, &#039;Roboto&#039;, &#039;Oxygen&#039;, &#039;Ubuntu&#039;, &#039;Cantarell&#039;, &#039;Fira Sans&#039;, &#039;Droid Sans&#039;, &#039;Helvetica Neue&#039;, sans-serif;">
-                                                                                                            <div style="font-size:14px;line-height:17px;text-align:left;color:#555555;font-family:-apple-system, BlinkMacSystemFont, &#039;Segoe UI&#039;, &#039;Roboto&#039;, &#039;Oxygen&#039;, &#039;Ubuntu&#039;, &#039;Cantarell&#039;, &#039;Fira Sans&#039;, &#039;Droid Sans&#039;, &#039;Helvetica Neue&#039;, sans-serif;padding-top: 15px;padding-right: 10px;padding-bottom: 15px;padding-left: 10px;">
-                                                                                                                <p style="margin: 0;font-size: 14px;line-height: 17px;text-align: left">
-                                                                                                                    Time&nbsp;
-                                                                                                                    <strong style="float:right">{{ $Sales->StartTime }}</strong>
-                                                                                                                    <br>
-                                                                                                                </p>
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                    </td>
-                                                                                                </tr>
+                                                                                               
 
 
                                                                                             </tbody>
@@ -403,7 +379,7 @@
                                                                                                             <div style="font-size:14px;line-height:21px;text-align:center;color:#555555;font-family:-apple-system, BlinkMacSystemFont, &#039;Segoe UI&#039;, &#039;Roboto&#039;, &#039;Oxygen&#039;, &#039;Ubuntu&#039;, &#039;Cantarell&#039;, &#039;Fira Sans&#039;, &#039;Droid Sans&#039;, &#039;Helvetica Neue&#039;, sans-serif;">
                                                                                                                 <p style="margin: 0;font-size: 14px;line-height: 21px;text-align: center">
                                                                                                                     <a style="font-size: 14px; line-height: 21px; text-align: center; color: #50A1F7; margin-right: 10px;" href="mailto:customers@hydottech.com">customers@hydottech.com</a><br/>
-                                                                                                                    <a style="display: inline-block; width: 80%; padding: 1rem; border-radius: 1.5rem; background-color: #000000; color: #ffffff; font-size: 1rem; text-align: center; text-decoration: none; cursor: pointer;" target="_blank" title="email" href="{{ $Sales->MeetingLink }}">Join Meeting</a>
+                                                                                                                    <a style="display: inline-block; width: 80%; padding: 1rem; border-radius: 1.5rem; background-color: #000000; color: #ffffff; font-size: 1rem; text-align: center; text-decoration: none; cursor: pointer;" target="_blank" title="email" href="{{ $Sales->Link }}">Join Meeting</a>
                                                                                                                 </p>
 
                                                                                                             </div>

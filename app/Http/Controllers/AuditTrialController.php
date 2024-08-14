@@ -9,6 +9,7 @@ use App\Models\AuditTrial;
 use App\Models\Visitors;
 use Illuminate\Support\Facades\Log;
 use App\Models\Partner;
+use DateTime;
 
 
 
@@ -40,7 +41,7 @@ function Auditor($UserId, $Action) {
             throw new \Exception('JSON decoding error: ' . json_last_error_msg());
         }
 
-        Log::info('The IP DETAILS:', (array)$ipDetails);
+
 
         $country = $ipDetails->country ?? 'Unknown';
         $city = $ipDetails->city ?? 'Unknown';
@@ -112,7 +113,7 @@ function PAuditor($UserId, $Action) {
             throw new \Exception('JSON decoding error: ' . json_last_error_msg());
         }
 
-        Log::info('The IP DETAILS:', (array)$ipDetails);
+
 
         $country = $ipDetails->country ?? 'Unknown';
         $city = $ipDetails->city ?? 'Unknown';
@@ -186,7 +187,7 @@ function PAuditor($UserId, $Action) {
             throw new \Exception('JSON decoding error: ' . json_last_error_msg());
         }
 
-        Log::info('The IP DETAILS:', (array)$ipDetails);
+
 
         $country = $ipDetails->country ?? 'Unknown';
         $city = $ipDetails->city ?? 'Unknown';

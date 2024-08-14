@@ -255,6 +255,10 @@ Route::post('UserManual', [OnBoardingController::class, 'UserManual']);
 Route::post('MOUSignature', [OnBoardingController::class, 'MOUSignature']);
 Route::post('CompleteStep4', [OnBoardingController::class, 'CompleteStep4']);
 Route::post('GetFinalMembers', [OnBoardingController::class, 'GetFinalMembers']);
+Route::post('GetAllMeeting', [OnBoardingController::class, 'GetAllMeeting']);
+
+
+
 
 Route::post('DeBoard', [OnBoardingController::class, 'DeBoard']);
 Route::post('GetAllDeBoard', [OnBoardingController::class, 'GetAllDeBoard']);

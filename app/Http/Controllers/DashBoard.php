@@ -16,9 +16,9 @@ use App\Models\Visitors;
 class DashBoard extends Controller
 {
 
- 
+
     function ViewTotalSales() {
-        $totalSales = Sales::sum('Amount');
+        $totalSales = Sales::where("IsApproved",true)->sum('Amount');
         return response()->json(['sales' => $totalSales]);
     }
 
@@ -35,7 +35,7 @@ class DashBoard extends Controller
         // Step 1: Calculate total sales for each year and the total sales over 5 years
         for ($i = 0; $i < 5; $i++) {
             $year = $currentYear - $i;
-            $totalSales = Sales::whereYear('updated_at', $year)->sum('Amount');
+            $totalSales = Sales::whereYear('updated_at', $year)->where("IsApproved",true)->sum('Amount');
             $salesData[] = [
                 'year' => $year,
                 'amount' => $totalSales
@@ -54,14 +54,18 @@ class DashBoard extends Controller
 
     function ViewMonthlySalesAndExpenses() {
         $currentYear = Carbon::now()->year;
+
+        // Fetch monthly sales with IsApproved = true condition
         $monthlySales = DB::table('sales')
             ->select(DB::raw('MONTH(updated_at) as month'), DB::raw('SUM(Amount) as total_sales'))
             ->whereYear('updated_at', $currentYear)
+            ->where('IsApproved', true)  // Add IsApproved condition here
             ->groupBy(DB::raw('MONTH(updated_at)'))
             ->get()
             ->keyBy('month')
             ->toArray();
 
+        // Fetch monthly expenses
         $monthlyExpenses = DB::table('expenses')
             ->select(DB::raw('MONTH(updated_at) as month'), DB::raw('SUM(Amount) as total_expenses'))
             ->whereYear('updated_at', $currentYear)
@@ -73,6 +77,7 @@ class DashBoard extends Controller
         $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         $stackedChartData = [[], []];
 
+        // Prepare data for the chart
         for ($i = 1; $i <= 12; $i++) {
             $sales = isset($monthlySales[$i]) ? $monthlySales[$i]->total_sales : 0;
             $expenses = isset($monthlyExpenses[$i]) ? $monthlyExpenses[$i]->total_expenses : 0;
@@ -81,6 +86,7 @@ class DashBoard extends Controller
             $stackedChartData[1][] = ['x' => $months[$i - 1], 'y' => (float)$expenses];
         }
 
+        // Prepare the custom series for the stacked column chart
         $stackedCustomSeries = [
             [
                 'dataSource' => $stackedChartData[0],
@@ -105,14 +111,16 @@ class DashBoard extends Controller
         ]);
     }
 
+
     function ViewTotalSalesForCurrentMonth() {
         $currentMonth = Carbon::now()->month;
         $currentYear = Carbon::now()->year;
 
-        // Get total sales for the current month
+        // Get total sales for the current month with IsApproved = true condition
         $totalSales = DB::table('sales')
             ->whereYear('updated_at', $currentYear)
             ->whereMonth('updated_at', $currentMonth)
+            ->where('IsApproved', true)  // Add IsApproved condition here
             ->sum('Amount');
 
         // Detect database type
@@ -122,7 +130,7 @@ class DashBoard extends Controller
         // Define the first day of the month
         $firstDayOfMonth = Carbon::now()->startOfMonth()->toDateString();
 
-        // Build the query for weekly sales
+        // Build the query for weekly sales based on the database type
         if ($databaseDriver == 'mysql') {
             $weeklySales = DB::table('sales')
                 ->select(DB::raw("
@@ -131,6 +139,7 @@ class DashBoard extends Controller
                 "))
                 ->whereYear('updated_at', $currentYear)
                 ->whereMonth('updated_at', $currentMonth)
+                ->where('IsApproved', true)  // Add IsApproved condition here
                 ->groupBy(DB::raw("WEEK(updated_at, 1) - WEEK('$firstDayOfMonth', 1) + 1"))
                 ->get()
                 ->keyBy('week')
@@ -143,18 +152,21 @@ class DashBoard extends Controller
                 "))
                 ->whereYear('updated_at', $currentYear)
                 ->whereMonth('updated_at', $currentMonth)
+                ->where('IsApproved', true)  // Add IsApproved condition here
                 ->groupBy(DB::raw("DATEPART(WEEK, updated_at) - DATEPART(WEEK, '$firstDayOfMonth') + 1"))
                 ->get()
                 ->keyBy('week')
                 ->toArray();
         }
 
+        // Prepare data for the Sparkline area chart
         $SparklineAreaData = [];
         for ($week = 1; $week <= 5; $week++) {
             $sales = isset($weeklySales[$week]) ? $weeklySales[$week]->total_sales : 0;
             $SparklineAreaData[] = ['x' => $week, 'yval' => (float)$sales];
         }
 
+        // Return the data as JSON
         return response()->json([
             'SparklineAreaData' => $SparklineAreaData,
             'totalSales' => (float)$totalSales
@@ -164,9 +176,10 @@ class DashBoard extends Controller
 
 
 
+
 function ThisYearSales() {
     $currentYear = Carbon::now()->year;
-    $currentYearSales = Sales::whereYear('updated_at', $currentYear)->sum('Amount');
+    $currentYearSales = Sales::whereYear('updated_at', $currentYear)->where("IsApproved",true)->sum('Amount');
 
     return response()->json(['thisYearSales' => $currentYearSales ]);
 }
@@ -189,13 +202,13 @@ function EarningData() {
     $totalProductsPreviousYear = OurPortfolioProjects::whereYear('created_at', $previousYear)->count();
 
     // 3. Sum current year sales
-    $currentYearSales = Sales::whereYear('updated_at', $currentYear)->sum('Amount');
+    $currentYearSales = Sales::whereYear('updated_at', $currentYear)->where("IsApproved",true)->sum('Amount');
 
     // 4. Sum current year expenses
     $currentYearExpenses = Expenses::whereYear('updated_at', $currentYear)->sum('Amount');
 
     // Calculate the sales and expenses for the previous year to determine the percentage change
-    $previousYearSales = Sales::whereYear('updated_at', $previousYear)->sum('Amount');
+    $previousYearSales = Sales::whereYear('updated_at', $previousYear)->where("IsApproved",true)->sum('Amount');
     $previousYearExpenses = Expenses::whereYear('updated_at', $previousYear)->sum('Amount');
 
     // Calculate percentage changes
@@ -328,15 +341,15 @@ function RecentTransaction() {
 }
 
 function YearlyContinent() {
-    // Fetch yearly sales data
-    $yearlySales = Sales::selectRaw('DATEPART(YEAR, updated_at) as year, SUM(Amount) as total_sales')
-        ->groupByRaw('DATEPART(YEAR, updated_at)')
-        ->orderByRaw('DATEPART(YEAR, updated_at) ASC')
+    // Fetch yearly sales data with IsApproved = true condition
+    $yearlySales = Sales::selectRaw('YEAR(updated_at) as year, SUM(Amount) as total_sales')
+        ->where('IsApproved', true)
+        ->groupByRaw('YEAR(updated_at)')
+        ->orderByRaw('YEAR(updated_at) ASC')
         ->get()
         ->toArray();
 
-    Log::info("Main Yearly Sales");
-    Log::info($yearlySales);
+
 
     $salesByContinent = [];
 
@@ -345,8 +358,10 @@ function YearlyContinent() {
         $year = $yearlySale['year'];
         $totalSales = intval($yearlySale['total_sales']); // Cast to integer
 
-        // Fetch sales records for the current year
-        $salesData = Sales::whereYear('updated_at', $year)->get();
+        // Fetch sales records for the current year with IsApproved = true condition
+        $salesData = Sales::whereYear('updated_at', $year)
+            ->where('IsApproved', true)
+            ->get();
 
         // Iterate over sales records to retrieve continent information
         foreach ($salesData as $sale) {
@@ -385,6 +400,7 @@ function YearlyContinent() {
 
     return response()->json($formattedData);
 }
+
 
 public function WeeklyStats()
 {
