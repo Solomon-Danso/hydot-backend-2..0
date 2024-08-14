@@ -55,7 +55,7 @@ class Finance extends Controller
         $s = new Sales();
         $s->Created_By_Id = $a->UserId;
         $s->Created_By_Name = $a->Name;
-        $s->TransactionId = $this->IdGenerator();
+        $s->TransactionId =  $this->audit->IdGeneratorLong();
         $s->ProductId = $p->ProductId;
         $s->ProductName = $p->ProductName;
         $s->CustomerId = $c->UserId;

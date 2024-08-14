@@ -40,7 +40,7 @@ class CustomersController extends Controller
 
 
 
-        $s->UserId = $this->IdGenerator();
+        $s->UserId = $this->audit->IdGenerator();
 
 
     if($req->filled("Continent")){
@@ -240,10 +240,8 @@ function DeleteCustomers(Request $req){
 
 
 
-function IdGenerator(): string {
-    $randomID = str_pad(mt_rand(1, 99999999), 8, '0', STR_PAD_LEFT);
-    return $randomID;
-}
+
+
 
 
 }

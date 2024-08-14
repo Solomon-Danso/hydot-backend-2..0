@@ -31,7 +31,7 @@ public function LogIn(Request $req)
             }
             else{
 
-                $user->Token = $this->IdGenerator();
+                $user->Token =  $this->audit->IdGeneratorLong();
                 $user->TokenExpire = Carbon::now()->addMinutes(10);
 
                 $saver = $user->save();
@@ -90,7 +90,7 @@ public function LogIn(Request $req)
             }
             else{
 
-                $user->Token = $this->IdGenerator();
+                $user->Token =  $this->audit->IdGeneratorLong();
                 $user->TokenExpire = Carbon::now()->addMinutes(10);
 
                 $saver = $user->save();

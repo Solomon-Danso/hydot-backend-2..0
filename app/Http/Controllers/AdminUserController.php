@@ -40,14 +40,14 @@ public function SetUpCreateAdmin(Request $req)
             ], 400);
         }
 
-       
+
         $s = new AdminUser();
 
         if ($req->hasFile("Picture")) {
             $s->Picture = $req->file("Picture")->store("", "public");
         }
 
-        $s->UserId = $this->IdGenerator();
+        $s->UserId = $this->audit->IdGenerator();
 
         $fields = ['Continent', 'Country', 'Name', 'Location', 'Phone', 'Email'];
         foreach ($fields as $field) {
@@ -56,7 +56,7 @@ public function SetUpCreateAdmin(Request $req)
             }
         }
 
-        $rawPassword = $this->IdGenerator();
+        $rawPassword =  $this->audit->IdGeneratorLong();
         $s->Password = bcrypt($rawPassword);
         $s->Role = AdminUser::count() < 1 ? "SuperAdmin" : "Admin";
 
@@ -130,7 +130,7 @@ function CreateAdmin(Request $req){
 
 
 
-        $s->UserId = $this->IdGenerator();
+        $s->UserId = $this->audit->IdGenerator();
 
 
     if($req->filled("Continent")){
@@ -157,7 +157,7 @@ function CreateAdmin(Request $req){
         $s->Email = $req->Email;
     }
 
-    $rawPassword = $this->IdGenerator();
+    $rawPassword =  $this->audit->IdGeneratorLong();
 
     $s->Password = bcrypt($rawPassword);
 
@@ -471,10 +471,8 @@ function DeleteAdmin(Request $req){
 
 
 
-function IdGenerator(): string {
-    $randomID = str_pad(mt_rand(1, 99999999), 8, '0', STR_PAD_LEFT);
-    return $randomID;
-}
+
+
 
 
 }

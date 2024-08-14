@@ -269,11 +269,26 @@ function PAuditor($UserId, $Action) {
         return $os;
     }
 
-
     function IdGenerator(): string {
-        $randomID = str_pad(mt_rand(1, 99999999), 8, '0', STR_PAD_LEFT);
+        $dateTime = new DateTime();
+        $randomID = $dateTime->format('YmdHis');
         return $randomID;
     }
+
+
+    function IdGeneratorLong(): string {
+
+        $dateTime = new DateTime();
+
+        $formattedDateTime = $dateTime->format('YmdHis');
+
+        $nanoseconds = str_pad((string)$dateTime->format('u'), 6, '0', STR_PAD_LEFT);
+        $randomID = $formattedDateTime . $nanoseconds;
+
+        return $randomID;
+    }
+
+
 
 
 

@@ -27,11 +27,11 @@ public function PartnerLogIn(Request $req)
         if ($user && Hash::check($req->Password, $user->Password)) {
 
             if($user->IsBlocked==true){
-                return response()->json(['message' => 'Your Account Has Been Blocked, Contact Site Administrator For Further Instruction '], 500);
+                return response()->json(['message' => 'Your account is currently inactive. Please contact HydotTech administrators at [customers@hydottech.com] for further assistance.'], 500);
             }
             else{
 
-                $user->Token = $this->IdGenerator();
+                $user->Token =  $this->audit->IdGeneratorLong();
                 $user->TokenExpire = Carbon::now()->addMinutes(10);
 
                 $saver = $user->save();
@@ -90,7 +90,7 @@ public function PartnerForgetPasswordStep1(Request $req)
             }
             else{
 
-                $user->Token = $this->IdGenerator();
+                $user->Token =  $this->audit->IdGeneratorLong();
                 $user->TokenExpire = Carbon::now()->addMinutes(10);
 
                 $saver = $user->save();

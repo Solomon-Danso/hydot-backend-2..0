@@ -49,7 +49,7 @@ function CreatePartner(Request $req){
 
 
 
-        $s->UserId = $this->IdGenerator();
+        $s->UserId = $this->audit->IdGenerator();
 
 
     if($req->filled("Continent")){
@@ -76,11 +76,13 @@ function CreatePartner(Request $req){
         $s->Email = $req->Email;
     }
 
-    $rawPassword = $this->IdGenerator();
+    $rawPassword =  $this->audit->IdGeneratorLong();
 
     $s->Password = bcrypt($rawPassword);
 
     $s->Role = "Partner";
+
+  //  $s->IsBlocked = true;
 
     $saver = $s->save();
     if($saver){
@@ -390,10 +392,8 @@ function DeletePartner(Request $req){
 
 
 
-function IdGenerator(): string {
-    $randomID = str_pad(mt_rand(1, 99999999), 8, '0', STR_PAD_LEFT);
-    return $randomID;
-}
+
+
 
 
 }
