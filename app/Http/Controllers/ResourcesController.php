@@ -10,6 +10,7 @@ use App\Models\AdminUser;
 use App\Mail\Resource;
 use Illuminate\Support\Facades\Mail;
 use App\Models\BulkSender;
+use Illuminate\Support\Facades\DB;
 
 class ResourcesController extends Controller
 {
@@ -70,7 +71,7 @@ class ResourcesController extends Controller
                 return response()->json(["message"=> $resMessage],200);
             }
             else{
-                return response()->json(["message"=> "Failed to send resources for partner"],200);
+                return response()->json(["message"=> "Failed to send resources for partner"],400);
             }
 
         }
@@ -119,7 +120,7 @@ class ResourcesController extends Controller
                 return response()->json(["message"=> $resMessage],200);
             }
             else{
-                return response()->json(["message"=> "Failed to send resources for partner"],200);
+                return response()->json(["message"=> "Failed to send resources for admin"],400);
             }
 
         }
@@ -134,6 +135,7 @@ class ResourcesController extends Controller
             $attachmentName = null;
             if ($req->hasFile("Resource")) {
                 $attachmentName = $req->file("Resource")->store("", "public");
+                $s->Resource = $attachmentName;
             }
 
 
@@ -163,7 +165,7 @@ class ResourcesController extends Controller
             }
            }
            else{
-            return response()->json(["message"=> "Failed to send resource to  ".$s->Name],200);
+            return response()->json(["message"=> "Failed to send resource to  ".$s->Name],400);
 
            }
 
@@ -219,7 +221,7 @@ class ResourcesController extends Controller
                 }
             }
             else{
-                return response()->json(["message"=> "Failed to send resource to  ".$s->Name],200);
+                return response()->json(["message"=> "Failed to send resource to  ".$s->Name],400);
 
             }
 
@@ -237,6 +239,47 @@ class ResourcesController extends Controller
 
         }
 
+        if ($req->Category=="Individual"){
+
+
+
+                $s->ResourceId = $ResourceID;
+                $s->Category = "Individual";
+
+                if($req->filled("UserId")){
+                    $s->UserId = $req->UserId;
+                }
+
+                if($req->hasFile("Resource")){
+                    $s->Resource = $req->file("Resource")->store("","public");
+                }
+
+
+                if($req->filled("ResourceType")){
+                    $s->ResourceType = $req->ResourceType;
+                }
+
+                if($req->filled("Title")){
+                    $s->Title = $req->Title;
+                }
+
+               $saver= $s->save();
+               if($saver){
+                $resMessage ="A ".$s->ResourceType." resource was added successfully";
+                $adminMessage = "Added ".$s->ResourceType." resource to Individuals";
+                $this->audit->Auditor($req->AdminId, $adminMessage);
+                return response()->json(["message"=> $resMessage],200);
+               }
+               else{
+                return response()->json(["message"=> "Failed to send resources for individual"],400);
+
+               }
+
+        }
+
+
+
+
 
 
 
@@ -245,11 +288,61 @@ class ResourcesController extends Controller
 
     }
 
-    public function GetResources(Request $req){
-        $s = Resources::where("UserId", $req->UserId)->get();
-
+    public function GetAllResources(Request $req){
+        $s = Resources::distinct('ResourceId')->get();
         return $s;
     }
+
+    public function DeleteResource(Request $req){
+        // Retrieve resources with the specified ResourceId
+        $resourceList = Resources::where("ResourceId", $req->ResourceId)->get();
+
+        // Check if the collection is empty
+        if(!$resourceList->isEmpty()){
+            $worked = false;
+
+            // Iterate through the resource list and delete each resource
+            foreach($resourceList as $resource){
+                $saver = $resource->delete();
+                if($saver){
+                    $worked = true;
+                } else {
+                    $worked = false;
+                    // Return response indicating partial success
+                    return response()->json(["message" => "All deleted except the resource ".$req->Title], 200);
+                }
+            }
+
+            // Return success or failure message
+            if ($worked){
+                $resMessage = "All deleted successfully";
+                $adminMessage = "Deleted a resource ";
+                $this->audit->Auditor($req->AdminId, $adminMessage);
+                return response()->json(["message" => $resMessage], 200);
+            } else {
+                return response()->json(["message" => "Failed to delete resource"], 400);
+            }
+        } else {
+            // Return response indicating that no resources were found
+            return response()->json(["message" => "No resource found"], 404);
+        }
+    }
+
+
+
+
+
+
+    public function GetSpecificResources(Request $req){
+        $s = Resources::where("UserId", $req->UserId)->get();
+        return $s;
+    }
+
+    public function GetCategoryResources(Request $req){
+        $s = Resources::where("Category", $req->Category)->get();
+        return $s;
+    }
+
 
     public function BulkEmail(Request $req){
 
@@ -273,6 +366,22 @@ class ResourcesController extends Controller
         }
 
 
+    }
+
+    public function EmptyBulkEmail(Request $req){
+        $s = BulkSender::get();
+        foreach($s as $d){
+            $s->delete();
+        }
+        return response()->json(["message"=>"Bulk Email List Deleted"],200);
+    }
+
+    public function DeleteOneBulkEmail(Request $req){
+        $s = BulkSender::where("id",$req->id)->first();
+        if(!$s){
+            $s->delete();
+            return response()->json(["message"=>$s->Email." Deleted"],200);
+        }
     }
 
 

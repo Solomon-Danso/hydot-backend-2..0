@@ -264,9 +264,14 @@ Route::post('GetAllDeBoard', [OnBoardingController::class, 'GetAllDeBoard']);
 Route::post('OnBoardFromDeBoard', [OnBoardingController::class, 'OnBoardFromDeBoard']);
 
 Route::post('CreateResources', [ResourcesController::class, 'CreateResources']);
-Route::post('GetResources', [ResourcesController::class, 'GetResources']);
-Route::post('BulkEmail', [ResourcesController::class, 'BulkEmail']);
+Route::post('GetSpecificResources', [ResourcesController::class, 'GetSpecificResources']);
+Route::post('GetCategoryResources', [ResourcesController::class, 'GetCategoryResources']);
+Route::post('DeleteResource', [ResourcesController::class, 'DeleteResource']);
 
+Route::post('BulkEmail', [ResourcesController::class, 'BulkEmail']);
+Route::post('EmptyBulkEmail', [ResourcesController::class, 'EmptyBulkEmail']);
+Route::post('DeleteOneBulkEmail', [ResourcesController::class, 'DeleteOneBulkEmail']);
+Route::post('GetAllResources', [ResourcesController::class, 'GetAllResources']);
 
 
 
