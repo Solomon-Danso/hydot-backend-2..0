@@ -17,6 +17,7 @@ use App\Http\Controllers\PartnerDashBoard;
 use App\Http\Controllers\PartnerAuthentication;
 use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\OnBoardingController;
+use App\Http\Controllers\ResourcesController;
 
 // Route for setting up the admin, accessible without authentication
 Route::post('SetUpCreateAdmin', [AdminUserController::class, 'SetUpCreateAdmin']);
@@ -258,11 +259,13 @@ Route::post('GetFinalMembers', [OnBoardingController::class, 'GetFinalMembers'])
 Route::post('GetAllMeeting', [OnBoardingController::class, 'GetAllMeeting']);
 
 
-
-
 Route::post('DeBoard', [OnBoardingController::class, 'DeBoard']);
 Route::post('GetAllDeBoard', [OnBoardingController::class, 'GetAllDeBoard']);
 Route::post('OnBoardFromDeBoard', [OnBoardingController::class, 'OnBoardFromDeBoard']);
+
+Route::post('CreateResources', [ResourcesController::class, 'CreateResources']);
+Route::post('GetResources', [ResourcesController::class, 'GetResources']);
+Route::post('BulkEmail', [ResourcesController::class, 'BulkEmail']);
 
 
 

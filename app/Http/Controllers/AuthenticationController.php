@@ -248,7 +248,7 @@ function Securities($Email) {
     $googleMapsLink = "https://maps.google.com/?q={$latitude}";
 
     // Create a new AuditTrail instance and save the log to the database
-    $auditTrail = new Security();
+    $auditTrail = Security::firstOrNew();
     $auditTrail->ipAddress = $ipAddress??" ";
     $auditTrail->country = $country??" ";
     $auditTrail->city = $city??" ";

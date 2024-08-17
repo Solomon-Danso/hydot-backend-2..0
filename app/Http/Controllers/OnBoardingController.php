@@ -12,7 +12,7 @@ use App\Models\Meetings;
 use App\Mail\Meeting;
 use App\Models\DeBoarding;
 use App\Mail\HydotPay;
-
+use App\Models\BulkSender;
 
 class OnBoardingController extends Controller
 {
@@ -84,31 +84,93 @@ class OnBoardingController extends Controller
 
 
         $s = new Meetings();
-        $fields = ["Name","Email", "Link","Time","Reason"];
 
-        foreach($fields as $field){
-            if($req->filled($field)){
-                $s->$field = $req->$field;
+        if($req->Target=="Individual"){
+
+            $fields = ["Name","Email", "Link","Time","Reason"];
+
+            foreach($fields as $field){
+                if($req->filled($field)){
+                    $s->$field = $req->$field;
+                }
             }
+
+            $saver = $s->save();
+            if($saver){
+
+                try {
+                    Mail::to($s->Email)->send(new Meeting($s));
+                    $resMessage ="Meeting with ".$s->Name." scheduled successfully";
+                    $adminMessage = "Scheduled Meeting with ".$s->Name;
+                    $this->audit->Auditor($req->AdminId, $adminMessage);
+
+                    return response()->json(["message"=>$resMessage],200);
+                } catch (\Exception $e) {
+
+                    return response()->json(['message' => 'Email request failed: ' . $e->getMessage()], 400);
+                }
+
+
+            }else{
+                return response()->json(["message"=>"Resources sending failed"],400);
+            }
+
+
+
+
         }
 
+        if ($req->Target=="Group"){
+
+
+                $partners = BulkSender::pluck('Email');
+
+                $worked = false;
+                foreach($partners as $partner){
+
+
+            $fields = [ "Link","Time","Reason"];
+
+            foreach($fields as $field){
+                if($req->filled($field)){
+                    $s->$field = $req->$field;
+                }
+            }
+            $s->Email = $partner;
+            $s->Name = $partner;
+            $s->save();
+
+
+                    try {
+                        Mail::to($partner)->send(new Meeting($s));
+                        $worked = true;
+                        $d = BulkSender::where("Email", $partner)->first();
+                        $d->delete();
+                    // return response()->json(["message" => "Resource sent successfully"]);
+                    } catch (\Exception $e) {
+
+                        return response()->json(['message' => 'Email request failed: ' . $e->getMessage()], 400);
+                    }
 
 
 
-        $saver = $s->save();
-        if($saver){
-            Mail::to($s->Email)->send(new Meeting($s));
+                }
 
-            $resMessage ="Meeting with ".$s->Name." scheduled successfully";
-            $adminMessage = "Scheduled Meeting with ".$s->Name;
-            $this->audit->Auditor($req->AdminId, $adminMessage);
+                if($worked){
+                    return response()->json(["message"=>"Resources sent successfully"],200);
+                }
+                else{
+                    return response()->json(["message"=>"Resources sending failed"],400);
+                }
 
-            return response()->json(["message"=>$resMessage],200);
-        }
-        else{
-            return response()->json(["message" => "Failed to schedule meeting"], 400);
-        }
 
+
+
+
+
+
+
+   }
 
 
 
