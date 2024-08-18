@@ -289,9 +289,42 @@ class ResourcesController extends Controller
     }
 
     public function GetAllResources(Request $req){
-        $s = Resources::distinct('ResourceId')->get();
+        $s = Resources::distinct('ResourceId')->orderBy('created_at',"desc")->get();
         return $s;
     }
+
+    public function GetGeneralResources(Request $req){
+        // Fetch distinct resources by category
+        $a = Resources::distinct('ResourceId')
+            ->where("Category", $req->Category)->get();
+
+        // Fetch distinct resources by user ID
+        $b = Resources::distinct('ResourceId')
+            ->where("UserId", $req->UserId)->get();
+
+        // Merge the two collections
+        $s = $a->merge($b);
+
+        // Sort the merged collection by 'created_at' in descending order
+        $s = $s->sortByDesc('created_at')->values();
+
+        return $s;
+    }
+
+    public function DownloadImage(Request $request)
+    {
+        $filename = $request->input('filename');
+        $filePath = storage_path('app/public/' . $filename);
+
+        if (file_exists($filePath)) {
+            return response()->download($filePath, $filename);
+        } else {
+            return response()->json(['message' => 'File not found'], 404);
+        }
+    }
+
+
+
 
     public function DeleteResource(Request $req){
         // Retrieve resources with the specified ResourceId
@@ -368,20 +401,23 @@ class ResourcesController extends Controller
 
     }
 
-    public function EmptyBulkEmail(Request $req){
-        $s = BulkSender::get();
-        foreach($s as $d){
+
+    public function DeleteOneBulkEmail(Request $req)
+    {
+        $s = BulkSender::where("id", $req->id)->first();
+
+        if ($s) {
             $s->delete();
+            return response()->json(["message" => $s->Email . " Deleted"], 200);
+        } else {
+            return response()->json(["message" => "Resource not found"], 404);
         }
-        return response()->json(["message"=>"Bulk Email List Deleted"],200);
     }
 
-    public function DeleteOneBulkEmail(Request $req){
-        $s = BulkSender::where("id",$req->id)->first();
-        if(!$s){
-            $s->delete();
-            return response()->json(["message"=>$s->Email." Deleted"],200);
-        }
+
+    public function GetBulkEmail(Request $req){
+        $s = BulkSender::orderBy("created_at","desc")->get();
+       return $s;
     }
 
 

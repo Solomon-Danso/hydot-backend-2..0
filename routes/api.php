@@ -269,9 +269,11 @@ Route::post('GetCategoryResources', [ResourcesController::class, 'GetCategoryRes
 Route::post('DeleteResource', [ResourcesController::class, 'DeleteResource']);
 
 Route::post('BulkEmail', [ResourcesController::class, 'BulkEmail']);
-Route::post('EmptyBulkEmail', [ResourcesController::class, 'EmptyBulkEmail']);
+Route::post('GetBulkEmail', [ResourcesController::class, 'GetBulkEmail']);
 Route::post('DeleteOneBulkEmail', [ResourcesController::class, 'DeleteOneBulkEmail']);
 Route::post('GetAllResources', [ResourcesController::class, 'GetAllResources']);
+Route::post('GetGeneralResources', [ResourcesController::class, 'GetGeneralResources']);
+Route::post('DownloadImage', [ResourcesController::class, 'DownloadImage']);
 
 
 
