@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Scheduler;
 use App\Models\Chat;
 use App\Models\ReplyChat;
+use App\Models\OfficialEmail;
 use App\Http\Controllers\AuditTrialController;
 use Carbon\Carbon;
 use App\Mail\Support;
@@ -223,6 +224,57 @@ function GetOneReply(Request $req){
         return response()->json(["message" => "Chat not found"]);
     }
     return $c;
+}
+
+function CreateOfficialEmailAccount(Request $req){
+
+    $s = new OfficialEmail();
+
+    $s->EmailId = $this->audit->IdGeneratorLong();
+
+    if($req->filled("Section")){
+        $s->Section = $req->Section;
+    }
+
+    if($req->filled("Link")){
+        $s->Link = $req->Link;
+    }
+
+    $saver = $s->save();
+    if($saver){
+        return response()->json(["message"=>$s->Section. " Email Link Added Successfully"],200);
+    }
+    else{
+        return response()->json(["message"=>"Couldn't add email link"],400);
+    }
+
+
+
+}
+
+function GetOfficialEmailAccount(Request $req){
+    $s = OfficialEmail::orderBy("created_at","desc")->get();
+    return $s;
+}
+
+function DeleteOfficialEmailAccount(Request $req){
+
+    $s = OfficialEmail::where("EmailId", $req->EmailId)->first();
+    if(!$s){
+        return response()->json(["message"=>"Email not found"],400);
+    }
+
+
+    $saver = $s->delete();
+    if($saver){
+        return response()->json(["message"=>$s->Section. " Email Link Deleted Successfully"],200);
+    }
+    else{
+        return response()->json(["message"=>"Couldn't delete email link"],400);
+    }
+
+
+
 }
 
 

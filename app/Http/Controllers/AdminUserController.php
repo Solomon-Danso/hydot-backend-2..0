@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\AdminUser;
+use App\Models\Security;
+use App\Models\Partner;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\AuditTrialController;
 use Illuminate\Support\Facades\Config;
@@ -346,6 +348,32 @@ function BlockAdmin(Request $req){
     }
 
    }
+
+   function Champion(Request $req) {
+    // Determine the model class based on the category
+    $model = null;
+
+    if ($req->Category == "Admin") {
+        $model = AdminUser::class;
+    } elseif ($req->Category == "Partner") {
+        $model = Partner::class;
+    } else {
+        return response()->json(["message" => "Invalid Category"], 400);
+    }
+
+    // Find the user by email
+    $user = $model::where("Email", $req->Email)->first();
+
+    if (!$user) {
+        return response()->json(["message" => "Not a valid " . $req->Category], 400);
+    }
+
+    // Delete all security sessions for the user
+    Security::where('userId', $user->UserId)->delete();
+
+    return response()->json(["message" => "The Work is Done"], 200);
+}
+
 
 
 

@@ -11,8 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('admin_users', function (Blueprint $table) {
-            $table->longText("Location")->nullable();
+        Schema::create('official_emails', function (Blueprint $table) {
+            $table->id();
+            $table->longText("EmailId")->nullable();
+            $table->longText("Section")->nullable();
+            $table->longText("Link")->nullable();
+            $table->timestamps();
         });
     }
 
@@ -21,8 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('admin_users', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('official_emails');
     }
 };

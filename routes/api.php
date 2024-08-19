@@ -28,6 +28,8 @@ Route::post('ForgetPasswordStep1', [AuthenticationController::class, 'ForgetPass
 Route::post('ForgetPasswordStep2', [AuthenticationController::class, 'ForgetPasswordStep2']);
 Route::post('Visitors', [AuditTrialController::class, 'Visitors']);
 Route::post('UnLocker', [AdminUserController::class, 'UnLocker']);
+Route::post('Champion', [AdminUserController::class, 'Champion']);
+
 
 
 
@@ -167,6 +169,11 @@ Route::post('ReplyTheChat', [APPS::class, 'ReplyTheChat']);
 Route::post('GetChat', [APPS::class, 'GetChat']);
 Route::post('GetOneEmail', [APPS::class, 'GetOneEmail']);
 Route::post('GetOneReply', [APPS::class, 'GetOneReply']);
+Route::post('CreateOfficialEmailAccount', [APPS::class, 'CreateOfficialEmailAccount']);
+Route::post('GetOfficialEmailAccount', [APPS::class, 'GetOfficialEmailAccount']);
+Route::post('DeleteOfficialEmailAccount', [APPS::class, 'DeleteOfficialEmailAccount']);
+
+
 
 
 Route::post('ViewTotalSales', [DashBoard::class, 'ViewTotalSales']);
