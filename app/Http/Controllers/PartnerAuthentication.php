@@ -39,7 +39,7 @@ public function PartnerLogIn(Request $req)
             }
             else{
 
-                $user->Token =  $this->audit->IdGeneratorLong();
+                $user->Token =  $this->audit->RandomIdGenerator();
                 $user->TokenExpire = Carbon::now()->addMinutes(10);
 
                 $saver = $user->save();

@@ -76,7 +76,7 @@ function CreatePartner(Request $req){
         $s->Email = $req->Email;
     }
 
-    $rawPassword =  $this->audit->IdGeneratorLong();
+    $rawPassword =  $this->audit->RandomIdGenerator();
 
     $s->Password = bcrypt($rawPassword);
 
@@ -87,13 +87,13 @@ function CreatePartner(Request $req){
     $saver = $s->save();
     if($saver){
 
-        $message = $s->Name."  was added as a partner";
+     $message = "Your registration was successful. Please check your email for further instructions.";
         $message2 = $s->Name."  is added as a partner";
         //$this->audit->Auditor($req->AdminId, $message);
 
         try {
             Mail::to($s->Email)->send(new Partners_at_Hydottech($s, $rawPassword));
-            return response()->json(["message" => $message2], 200);
+            return response()->json(["message" => $message], 200);
         } catch (\Exception $e) {
 
             return response()->json(["message" => "Email Failed"], 400);

@@ -16,7 +16,7 @@ $this->rawPassword = $rawPassword;
 }
 
 public function build(){
-return $this->markdown('emails.contact.message')
+return $this->markdown('emails.contact.partners')
             ->with(['contact' => $this->AdminUser,
              'rawPassword' => $this->rawPassword]);
 
