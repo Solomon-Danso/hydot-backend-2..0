@@ -84,6 +84,8 @@ function CreatePartner(Request $req){
 
   //  $s->IsBlocked = true;
 
+
+  
     $saver = $s->save();
     if($saver){
 
