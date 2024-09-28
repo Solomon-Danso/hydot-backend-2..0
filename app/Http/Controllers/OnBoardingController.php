@@ -13,6 +13,8 @@ use App\Mail\Meeting;
 use App\Models\DeBoarding;
 use App\Mail\HydotPay;
 use App\Models\BulkSender;
+use App\Models\Partner;
+
 
 class OnBoardingController extends Controller
 {
@@ -170,7 +172,58 @@ class OnBoardingController extends Controller
 
 
 
-   }
+}
+
+if ($req->Target=="Partners"){
+
+
+    $partners = Partner::where("IsBlocked",false)->get();
+
+    $worked = false;
+    foreach($partners as $partner){
+
+
+    $fields = [ "Link","Time","Reason"];
+
+    foreach($fields as $field){
+        if($req->filled($field)){
+            $s->$field = $req->$field;
+        }
+    }
+    $s->Email = $partner->Email;
+    $s->Name = $partner->Name;
+    $s->save();
+
+
+            try {
+                Mail::to($partner->Email)->send(new Meeting($s));
+                $worked = true;
+
+            // return response()->json(["message" => "Resource sent successfully"]);
+            } catch (\Exception $e) {
+
+                return response()->json(['message' => 'Email request failed: ' . $e->getMessage()], 400);
+            }
+
+
+
+        }
+
+        if($worked){
+            return response()->json(["message"=>"Schedule sent successfully"],200);
+        }
+        else{
+            return response()->json(["message"=>"Schedule sending failed"],400);
+        }
+
+
+
+
+
+
+
+
+}
 
 
 
