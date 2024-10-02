@@ -14,6 +14,13 @@ use App\Models\DeBoarding;
 use App\Mail\HydotPay;
 use App\Models\BulkSender;
 use App\Models\Partner;
+use App\Models\ScheduleEmail;
+use App\Mail\Official;
+use App\Models\AdminUser;
+use App\Models\ImageUploader;
+
+
+
 
 
 class OnBoardingController extends Controller
@@ -172,27 +179,27 @@ class OnBoardingController extends Controller
 
 
 
-}
-
-if ($req->Target=="Partners"){
-
-
-    $partners = Partner::where("IsBlocked",false)->get();
-
-    $worked = false;
-    foreach($partners as $partner){
-
-
-    $fields = [ "Link","Time","Reason"];
-
-    foreach($fields as $field){
-        if($req->filled($field)){
-            $s->$field = $req->$field;
         }
-    }
-    $s->Email = $partner->Email;
-    $s->Name = $partner->Name;
-    $s->save();
+
+        if ($req->Target=="Partners"){
+
+
+        $partners = Partner::where("IsBlocked",false)->get();
+
+        $worked = false;
+        foreach($partners as $partner){
+
+
+        $fields = [ "Link","Time","Reason"];
+
+        foreach($fields as $field){
+            if($req->filled($field)){
+                $s->$field = $req->$field;
+            }
+        }
+        $s->Email = $partner->Email;
+        $s->Name = $partner->Name;
+        $s->save();
 
 
             try {
@@ -223,13 +230,291 @@ if ($req->Target=="Partners"){
 
 
 
-}
+
+        }
 
 
+    }
+
+
+    public function ScheduleEmail(Request $req){
+
+        $meetingId = $this->audit->IdGeneratorLong();
+
+
+        $s = new ScheduleEmail();
+
+        if($req->Target=="Individual"){
+
+            if($req->filled("Target")){
+                $s->Target = $req->Target;
+            }
+
+            if($req->filled("Email")){
+                $s->Email = $req->Email;
+            }
+            if($req->filled("Message")){
+                $s->Message = $req->Message;
+            }
+
+            $s->MessageId = $meetingId;
+
+
+
+            $saver = $s->save();
+            if($saver){
+
+                try {
+                    Mail::to($s->Email)->send(new Official($s));
+                    $resMessage ="Schedule email to ".$s->Email;
+                    $adminMessage = "Scheduled email to ".$s->Email;
+                    $this->audit->Auditor($req->AdminId, $adminMessage);
+
+                    return response()->json(["message"=>$resMessage],200);
+                } catch (\Exception $e) {
+
+                    return response()->json(['message' => 'Email request failed: ' . $e->getMessage()], 400);
+                }
+
+
+            }else{
+                return response()->json(["message"=>"Schedule sending failed"],400);
+            }
+
+
+
+
+        }
+
+        if ($req->Target=="Bulk"){
+
+
+            $partners = BulkSender::pluck('Email');
+
+            $worked = false;
+            foreach($partners as $partner){
+
+
+            $s->MessageId = $meetingId;
+
+            $s->Email = $partner;
+            $s->Target = "Bulk";
+            if($req->filled("Message")){
+                $s->Message = $req->Message;
+            }
+
+            $s->save();
+
+
+                    try {
+                        Mail::to($partner)->send(new Official($s));
+                        $worked = true;
+                        $d = BulkSender::where("Email", $partner)->first();
+                        $d->delete();
+                    // return response()->json(["message" => "Resource sent successfully"]);
+                    } catch (\Exception $e) {
+
+                        return response()->json(['message' => 'Email request failed: ' . $e->getMessage()], 400);
+                    }
+
+
+
+                }
+
+                if($worked){
+                    return response()->json(["message"=>"Schedule sent successfully"],200);
+                }
+                else{
+                    return response()->json(["message"=>"Schedule sending failed"],400);
+                }
+
+
+
+
+
+
+
+
+        }
+
+        if ($req->Target=="Partners"){
+
+
+            $partners = Partner::where("IsBlocked",false)->get();
+
+            $worked = false;
+            foreach($partners as $partner){
+
+
+                $s->MessageId = $meetingId;
+
+                $s->Email = $partner->Email;
+                $s->Target = "Partners";
+                if($req->filled("Message")){
+                    $s->Message = $req->Message;
+                }
+            $s->save();
+
+
+            try {
+                Mail::to($partner->Email)->send(new Official($s));
+                $worked = true;
+
+            // return response()->json(["message" => "Resource sent successfully"]);
+            } catch (\Exception $e) {
+
+                return response()->json(['message' => 'Email request failed: ' . $e->getMessage()], 400);
+            }
+
+
+
+            }
+
+            if($worked){
+                return response()->json(["message"=>"Schedule sent successfully"],200);
+            }
+            else{
+                return response()->json(["message"=>"Schedule sending failed"],400);
+            }
+
+
+
+
+
+
+
+
+
+        }
+
+
+        if ($req->Target=="Admin"){
+
+
+            $partners = AdminUser::where("IsBlocked",false)->get();
+
+            $worked = false;
+            foreach($partners as $partner){
+
+
+                $s->MessageId = $meetingId;
+
+                $s->Email = $partner->Email;
+                $s->Target = "Partners";
+                if($req->filled("Message")){
+                    $s->Message = $req->Message;
+                }
+            $s->save();
+
+
+            try {
+                Mail::to($partner->Email)->send(new Official($s));
+                $worked = true;
+
+            // return response()->json(["message" => "Resource sent successfully"]);
+            } catch (\Exception $e) {
+
+                return response()->json(['message' => 'Email request failed: ' . $e->getMessage()], 400);
+            }
+
+
+
+            }
+
+            if($worked){
+                return response()->json(["message"=>"Schedule sent successfully"],200);
+            }
+            else{
+                return response()->json(["message"=>"Schedule sending failed"],400);
+            }
+
+
+
+
+
+
+
+
+
+        }
+
+        if ($req->Target=="Customers"){
+
+
+            $partners = Customers::get();
+
+            $worked = false;
+            foreach($partners as $partner){
+
+
+                $s->MessageId = $meetingId;
+
+                $s->Email = $partner->Email;
+                $s->Target = "Partners";
+                if($req->filled("Message")){
+                    $s->Message = $req->Message;
+                }
+            $s->save();
+
+
+            try {
+                Mail::to($partner->Email)->send(new Official($s));
+                $worked = true;
+
+            // return response()->json(["message" => "Resource sent successfully"]);
+            } catch (\Exception $e) {
+
+                return response()->json(['message' => 'Email request failed: ' . $e->getMessage()], 400);
+            }
+
+
+
+            }
+
+            if($worked){
+                return response()->json(["message"=>"Schedule sent successfully"],200);
+            }
+            else{
+                return response()->json(["message"=>"Schedule sending failed"],400);
+            }
+
+
+
+
+
+
+
+
+
+        }
 
 
 
     }
+
+    // public function ImageUploader(Request $req) {
+    //     $s = new ImageUploader();
+
+    //     if ($req->hasFile("upload")) { // Check for 'upload' if that's the key CKEditor uses
+    //         $s->Image = $req->file("upload")->store("", "public"); // Store under public disk
+    //         $saver = $s->save();
+
+    //         if ($saver) {
+    //             return response()->json([
+    //                 "url" => url('storage/' . $s->Image) // Use url() helper for full URL
+    //             ], 200);
+    //         } else {
+    //             return response()->json(["message" => "Image upload failed"], 400);
+    //         }
+    //     } else {
+    //         return response()->json(["message" => "No file uploaded"], 400);
+    //     }
+    // }
+
+
+
+
+
 
     public function GetAllMeeting(Request $req){
 

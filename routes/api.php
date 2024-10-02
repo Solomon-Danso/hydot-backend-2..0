@@ -31,6 +31,7 @@ Route::post('UnLocker', [AdminUserController::class, 'UnLocker']);
 Route::post('Champion', [AdminUserController::class, 'Champion']);
 
 
+// Route::post('ImageUploader', [OnBoardingController::class, 'ImageUploader']);
 
 
 
@@ -245,6 +246,8 @@ Route::post('BlockPartner', [PartnerController::class, 'BlockPartner']);
 Route::post('OnBoard', [OnBoardingController::class, 'OnBoard']);
 Route::post('GetStep1Members', [OnBoardingController::class, 'GetStep1Members']);
 Route::post('ScheduleMeeting', [OnBoardingController::class, 'ScheduleMeeting']);
+Route::post('ScheduleEmail', [OnBoardingController::class, 'ScheduleEmail']);
+
 Route::post('FirstMeeting', [OnBoardingController::class, 'FirstMeeting']);
 Route::post('CompleteStep1', [OnBoardingController::class, 'CompleteStep1']);
 Route::post('GetStep2Members', [OnBoardingController::class, 'GetStep2Members']);
