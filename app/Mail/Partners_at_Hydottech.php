@@ -18,7 +18,8 @@ $this->rawPassword = $rawPassword;
 public function build(){
 return $this->markdown('emails.contact.partners')
             ->with(['contact' => $this->AdminUser,
-             'rawPassword' => $this->rawPassword]);
+             'rawPassword' => $this->rawPassword])
+             ->subject('Hydot Technology Partners ');
 
 }
 

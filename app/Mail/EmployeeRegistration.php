@@ -17,7 +17,8 @@ $this->AdminUser = $AdminUser;
 
 public function build(){
 return $this->markdown('emails.contact.employee')
-            ->with(['contact' => $this->AdminUser]);
+            ->with(['contact' => $this->AdminUser])
+            ->subject('Hydot Tech Employee Registration');
 
 }
 

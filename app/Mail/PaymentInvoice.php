@@ -15,9 +15,10 @@ $this->Sales = $Sales;
 }
 
 public function build(){
-return $this->markdown('emails.contact.payment') 
-            ->with(['contact' => $this->Sales]);
-         
+return $this->markdown('emails.contact.payment')
+            ->with(['contact' => $this->Sales])
+            ->subject('Hydot Tech Payment Invoice');
+
 }
 
 

@@ -40,7 +40,8 @@ class Support extends Mailable
                          'username' => $this->username,
                          'messageContent' => $this->message,
                          'attachment' => $this->attachment
-                     ]);
+                     ])
+                     ->subject('Hydot Tech Support Team');
 
         // If attachment exists, attach it to the email
         if ($this->attachment) {

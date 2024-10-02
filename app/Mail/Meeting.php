@@ -16,7 +16,8 @@ $this->Sales = $Sales;
 
 public function build(){
 return $this->markdown('emails.contact.meetings')
-            ->with(['contact' => $this->Sales]);
+            ->with(['contact' => $this->Sales])
+            ->subject('Hydot Tech Meeting Schedule');
 
 }
 

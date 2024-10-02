@@ -16,7 +16,8 @@ $this->Sales = $Sales;
 
 public function build(){
 return $this->markdown('emails.contact.hydotpay')
-            ->with(['contact' => $this->Sales]);
+            ->with(['contact' => $this->Sales])
+            ->subject('Secure Payment with Hydot Pay');
 
 }
 

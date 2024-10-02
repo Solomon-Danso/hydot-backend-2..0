@@ -19,5 +19,6 @@ class Authentication extends Mailable
     public function build()
     {
         return $this->markdown('emails.contact.login')
-                    ->with(['token' => $this->token]);
+                    ->with(['token' => $this->token])
+                    ->subject('Hydot Tech Authentication');
     }}
