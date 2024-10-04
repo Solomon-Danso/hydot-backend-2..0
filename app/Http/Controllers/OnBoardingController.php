@@ -18,6 +18,7 @@ use App\Models\ScheduleEmail;
 use App\Mail\Official;
 use App\Models\AdminUser;
 use App\Models\ImageUploader;
+use Illuminate\Support\Facades\Log;
 
 
 
@@ -92,9 +93,10 @@ class OnBoardingController extends Controller
 
 
 
-        $s = new Meetings();
+
 
         if($req->Target=="Individual"){
+            $s = new Meetings();
 
             $fields = ["Name","Email", "Link","Time","Reason"];
 
@@ -136,7 +138,7 @@ class OnBoardingController extends Controller
 
                 $worked = false;
                 foreach($partners as $partner){
-
+                    $s = new Meetings();
 
             $fields = [ "Link","Time","Reason"];
 
@@ -158,25 +160,15 @@ class OnBoardingController extends Controller
                     // return response()->json(["message" => "Resource sent successfully"]);
                     } catch (\Exception $e) {
 
-                        return response()->json(['message' => 'Email request failed: ' . $e->getMessage()], 400);
+                        Log::info('Failed to send email to: ' . $s->Email . '. Error: ' . $e->getMessage());
+                        continue;
                     }
 
 
 
                 }
 
-                if($worked){
-                    return response()->json(["message"=>"Resources sent successfully"],200);
-                }
-                else{
-                    return response()->json(["message"=>"Resources sending failed"],400);
-                }
-
-
-
-
-
-
+                return response()->json(["message"=>"Message sent successfully"],200);
 
 
         }
@@ -186,9 +178,8 @@ class OnBoardingController extends Controller
 
         $partners = Partner::where("IsBlocked",false)->get();
 
-        $worked = false;
         foreach($partners as $partner){
-
+            $s = new Meetings();
 
         $fields = [ "Link","Time","Reason"];
 
@@ -209,19 +200,15 @@ class OnBoardingController extends Controller
             // return response()->json(["message" => "Resource sent successfully"]);
             } catch (\Exception $e) {
 
-                return response()->json(['message' => 'Email request failed: ' . $e->getMessage()], 400);
+                Log::info('Failed to send email to: ' . $s->Email . '. Error: ' . $e->getMessage());
+                continue;
             }
 
 
 
         }
 
-        if($worked){
-            return response()->json(["message"=>"Schedule sent successfully"],200);
-        }
-        else{
-            return response()->json(["message"=>"Schedule sending failed"],400);
-        }
+        return response()->json(["message"=>"Schedule sent successfully"],200);
 
 
 
@@ -242,9 +229,11 @@ class OnBoardingController extends Controller
         $meetingId = $this->audit->IdGeneratorLong();
 
 
-        $s = new ScheduleEmail();
+
 
         if($req->Target=="Individual"){
+
+            $s = new ScheduleEmail();
 
             if($req->filled("Target")){
                 $s->Target = $req->Target;
@@ -291,9 +280,10 @@ class OnBoardingController extends Controller
 
             $partners = BulkSender::pluck('Email');
 
-            $worked = false;
+
             foreach($partners as $partner){
 
+            $s = new ScheduleEmail();
 
             $s->MessageId = $meetingId;
 
@@ -314,19 +304,16 @@ class OnBoardingController extends Controller
                     // return response()->json(["message" => "Resource sent successfully"]);
                     } catch (\Exception $e) {
 
-                        return response()->json(['message' => 'Email request failed: ' . $e->getMessage()], 400);
+                        Log::info('Failed to send email to: ' . $s->Email . '. Error: ' . $e->getMessage());
+                        continue;
                     }
 
 
 
                 }
 
-                if($worked){
-                    return response()->json(["message"=>"Schedule sent successfully"],200);
-                }
-                else{
-                    return response()->json(["message"=>"Schedule sending failed"],400);
-                }
+                return response()->json(["message"=>"Schedule sent successfully"],200);
+
 
 
 
@@ -344,7 +331,7 @@ class OnBoardingController extends Controller
 
             $worked = false;
             foreach($partners as $partner){
-
+                $s = new ScheduleEmail();
 
                 $s->MessageId = $meetingId;
 
@@ -362,27 +349,14 @@ class OnBoardingController extends Controller
 
             // return response()->json(["message" => "Resource sent successfully"]);
             } catch (\Exception $e) {
-
-                return response()->json(['message' => 'Email request failed: ' . $e->getMessage()], 400);
+                Log::info('Failed to send email to: ' . $s->Email . '. Error: ' . $e->getMessage());
+                continue;
             }
 
 
 
             }
-
-            if($worked){
-                return response()->json(["message"=>"Schedule sent successfully"],200);
-            }
-            else{
-                return response()->json(["message"=>"Schedule sending failed"],400);
-            }
-
-
-
-
-
-
-
+            return response()->json(["message"=>"Schedule sent successfully"],200);
 
 
         }
@@ -395,7 +369,7 @@ class OnBoardingController extends Controller
 
             $worked = false;
             foreach($partners as $partner){
-
+                $s = new ScheduleEmail();
 
                 $s->MessageId = $meetingId;
 
@@ -413,27 +387,15 @@ class OnBoardingController extends Controller
 
             // return response()->json(["message" => "Resource sent successfully"]);
             } catch (\Exception $e) {
-
-                return response()->json(['message' => 'Email request failed: ' . $e->getMessage()], 400);
+                Log::info('Failed to send email to: ' . $s->Email . '. Error: ' . $e->getMessage());
+                continue;
             }
 
 
 
             }
 
-            if($worked){
-                return response()->json(["message"=>"Schedule sent successfully"],200);
-            }
-            else{
-                return response()->json(["message"=>"Schedule sending failed"],400);
-            }
-
-
-
-
-
-
-
+            return response()->json(["message"=>"Schedule sent successfully"],200);
 
 
         }
@@ -445,7 +407,7 @@ class OnBoardingController extends Controller
 
             $worked = false;
             foreach($partners as $partner){
-
+                $s = new ScheduleEmail();
 
                 $s->MessageId = $meetingId;
 
@@ -463,27 +425,15 @@ class OnBoardingController extends Controller
 
             // return response()->json(["message" => "Resource sent successfully"]);
             } catch (\Exception $e) {
-
-                return response()->json(['message' => 'Email request failed: ' . $e->getMessage()], 400);
+                Log::info('Failed to send email to: ' . $s->Email . '. Error: ' . $e->getMessage());
+                continue;
             }
 
 
 
             }
 
-            if($worked){
-                return response()->json(["message"=>"Schedule sent successfully"],200);
-            }
-            else{
-                return response()->json(["message"=>"Schedule sending failed"],400);
-            }
-
-
-
-
-
-
-
+            return response()->json(["message"=>"Schedule sent successfully"],200);
 
 
         }
