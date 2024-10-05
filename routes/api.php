@@ -246,6 +246,7 @@ Route::post('BlockPartner', [PartnerController::class, 'BlockPartner']);
 Route::post('OnBoard', [OnBoardingController::class, 'OnBoard']);
 Route::post('GetStep1Members', [OnBoardingController::class, 'GetStep1Members']);
 Route::post('ScheduleMeeting', [OnBoardingController::class, 'ScheduleMeeting']);
+Route::post('GetAllScheduleEmail', [OnBoardingController::class, 'GetAllScheduleEmail']);
 Route::post('ScheduleEmail', [OnBoardingController::class, 'ScheduleEmail']);
 
 Route::post('FirstMeeting', [OnBoardingController::class, 'FirstMeeting']);

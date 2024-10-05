@@ -462,6 +462,17 @@ class OnBoardingController extends Controller
     // }
 
 
+    public function GetAllScheduleEmail(Request $req) {
+        $s = ScheduleEmail::orderBy("created_at", "desc")->get();
+
+        // Process each email to remove HTML tags and replace &nbsp; with a new line
+        foreach ($s as $email) {
+            $email->Message = strip_tags(str_replace('&nbsp;', "\n", $email->Message));
+        }
+
+        return $s;
+    }
+
 
 
 
