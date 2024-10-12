@@ -61,42 +61,7 @@ class HCSController extends Controller
 
     }
 
-    public function UpdateConfigurePackage(Request $req){
 
-        $s = PackagePrice::where("ProductId", $req->ProductId)->first();
-        if($s == null){
-            return response()->json(["message" => "Product does not exist"], 400);
-
-        }
-
-        $field = ["ProductName", "PackageType", "VariableCost"];
-
-        foreach($field as $f){
-
-            if($req->filled($f)){
-                $s->$f = $req->$f;
-            }
-
-        }
-
-        $saver = $s->save();
-
-        if($saver){
-
-            $resMessage ="Package Configuration updated for  ".$s->ProductName." successfully";
-            $adminMessage = "Package Configuration updated for  ".$s->ProductName;
-            $this->audit->Auditor($req->AdminId, $adminMessage);
-
-            return response()->json(["message" => $resMessage], 200);
-
-
-        }else{
-            return response()->json(["message" => "Failed to update products"], 400);
-        }
-
-
-
-    }
 
     public function DeleteConfigurePackage(Request $req){
 

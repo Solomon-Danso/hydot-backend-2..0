@@ -21,7 +21,7 @@ class ClientApiController extends Controller
 
     function CreateClientApiServerURL(Request $req){
 
-        $s = Customers::where('UserId', $req->Email)->first();
+        $s = Customers::where('UserId', $req->UserId)->first();
         if ($s==null) {
             return response()->json(['message' => 'Customer not found'], 400);
         }
@@ -36,6 +36,7 @@ class ClientApiController extends Controller
         $c = new ClientApi();
 
             $c->apiHost = $req->apiHost;
+            $c->ApiServerURL = $req->ApiServerURL;
 
             $c->CompanyId = $s->UserId;
 
@@ -47,8 +48,8 @@ class ClientApiController extends Controller
 
             $c->productId = $p->ProductId;
 
-            $c->productName = $p->productName;
-            $c->packageType = $p->packageType;
+            $c->productName = $p->ProductName;
+            $c->packageType = $p->PackageType;
 
             $c->apiKey = $this->audit->TokenGenerator();
             $c->apiSecret = $this->audit->TokenGenerator();
@@ -66,20 +67,24 @@ class ClientApiController extends Controller
     }
 
     function UpdateClientApiServerURL(Request $req){
-        $c = ClientApi::where("CompanyId",$req->CompanyId) -> where("id", $req->Id)->first();
+        $c = ClientApi::where("CompanyId",$req->CompanyId)->first();
 
         if($c==null){
             return response()->json(["message"=>"ApiServerURL for this company not found"],400);
         }
 
+        $p = PackagePrice::where('ProductId', $req->ProductId)->first();
+        if ($p==null) {
+            return response()->json(['message' => 'Product not found'], 400);
+        }
 
+
+        $c->packageType = $p->PackageType;
 
         if($req->filled("ApiServerURL")){
             $c->ApiServerURL = $req->ApiServerURL;
         }
-        if($req->filled("ApiMediaURL")){
-            $c->ApiMediaURL = $req->ApiMediaURL;
-        }
+
 
         $saver= $c->save();
         if($saver){
