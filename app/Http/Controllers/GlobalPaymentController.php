@@ -127,8 +127,6 @@ public function SchedulePayment(Request $req){
 }
 
 
-
-
 public function MakePayment($TransactionId)
 {
     $sales = Sales::where("TransactionId", $TransactionId)->first();
@@ -187,7 +185,6 @@ public function MakePayment($TransactionId)
 }
 
 
-
 function ConfirmPayment($RefId)
 {
     $sales = Sales::where("TransactionId",$RefId)->first();
@@ -206,6 +203,115 @@ function ConfirmPayment($RefId)
 
 
 }
+
+
+
+
+public function HCSSchedulePayment(Request $req){
+
+
+    $s = new Sales();
+    $sections = [ "CustomerName", "CustomerId", "PaymentReference","Amount"];
+
+    foreach($sections as $sec){
+        if($req->filled($sec)){
+            $s->$sec = $req->$sec;
+        }
+    }
+
+    $s->TransactionId = $this-> IdGenerator();
+    $s->IsApproved = false;
+
+    $saver = $s->save();
+    if($saver){
+
+        Mail::to($r->Email)->send(new HydotPay($s));
+
+        $message = "Scheduled payment for ".$s->CustomerName;
+        $this->audit->Auditor($req->AdminId, $message);
+
+
+        return response()->json(["message" => $message], 200);
+
+    }else{
+        return response()->json(["message" => "Failed to schedule payment"], 400);
+    }
+
+
+}
+
+
+public function HCSMakePayment($TransactionId)
+{
+    $sales = Sales::where("TransactionId", $TransactionId)->first();
+    if (!$sales) {
+        return response()->json(["message" => "Transaction not found"], 400);
+    }
+
+    // Ensure the total amount is an integer and in the smallest currency unit (e.g., kobo, pesewas)
+    $totalInPesewas = intval($sales->Amount * 100);
+
+    $tref = Paystack::genTranxRef();
+
+    $saver = $sales->save();
+    if ($saver) {
+        $response = Http::post('https://mainapi.hydottech.com/api/AddPayment', [
+            'tref' =>  $TransactionId,
+            'ProductId' => "hcsCollection",
+            'Product' => 'Manual Collection',
+            'Username' => $sales->CustomerName,
+            'Amount' => $sales->Amount,
+            'SuccessApi' => 'https://mainapi.hydottech.com/api/ConfirmPayment/' . $TransactionId,
+            //'SuccessApi' => 'https://hydottech.com',
+            'CallbackURL' => 'https://hydottech.com',
+        ]);
+
+        if ($response->successful()) {
+            // Function to validate an email address
+            function isValidEmail($email) {
+                return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
+            }
+
+            // Determine which email to use and log the decision
+            if (isValidEmail($sales->CustomerId)) {
+                $email = $sales->CustomerId;
+                Log::info("Using CustomerId as email: {$sales->CustomerId}");
+            } else {
+                $u = Customers::where("UserId", $sales->CustomerId)->first();
+                $email = $u->Email;
+                Log::info("CustomerId is not a valid email. Using Email: {$u->Email}");
+            }
+
+            $paystackData = [
+                "amount" => $totalInPesewas, // Amount in pesewas
+                "reference" => $TransactionId,
+                "email" => $email,
+                "currency" => "GHS",
+            ];
+
+            return Paystack::getAuthorizationUrl($paystackData)->redirectNow();
+        } else {
+            return response()->json(["message" => "External Payment Api is down"], 400);
+        }
+    } else {
+        return response()->json(["message" => "Failed to initialize payment"], 400);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function GetSpecificUnApprovedPayment(Request $req){
 

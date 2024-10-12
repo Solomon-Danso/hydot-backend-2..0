@@ -18,6 +18,7 @@ use App\Http\Controllers\PartnerAuthentication;
 use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\OnBoardingController;
 use App\Http\Controllers\ResourcesController;
+use App\Http\Controllers\HCSController;
 
 // Route for setting up the admin, accessible without authentication
 Route::post('SetUpCreateAdmin', [AdminUserController::class, 'SetUpCreateAdmin']);
@@ -29,6 +30,8 @@ Route::post('ForgetPasswordStep2', [AuthenticationController::class, 'ForgetPass
 Route::post('Visitors', [AuditTrialController::class, 'Visitors']);
 Route::post('UnLocker', [AdminUserController::class, 'UnLocker']);
 Route::post('Champion', [AdminUserController::class, 'Champion']);
+Route::get('HCSSchedulePayment/{softwareID}/{Amount}', [HCSController::class, 'HCSSchedulePayment']);
+Route::get('HCSMakePayment/{TransactionId}/{softwareID}/{Amount}', [HCSController::class, 'HCSMakePayment']);
 
 
 // Route::post('ImageUploader', [OnBoardingController::class, 'ImageUploader']);
@@ -81,6 +84,18 @@ Route::post('PartnerUnLocker', [PartnerAuthentication::class, 'PartnerUnLocker']
 // Routes that require authentication
 Route::middleware([ApiAuthenticator::class])->group(function () {
 
+
+
+
+    Route::post('ConfigurePackage', [HCSController::class, 'ConfigurePackage']);
+    Route::post('UpdateConfigurePackage', [HCSController::class, 'UpdateConfigurePackage']);
+    Route::post('DeleteConfigurePackage', [HCSController::class, 'DeleteConfigurePackage']);
+    Route::post('ViewConfigurePackage', [HCSController::class, 'ViewConfigurePackage']);
+    Route::post('ViewAllConfigurePackage', [HCSController::class, 'ViewAllConfigurePackage']);
+    Route::get('SubscribeToken/{softwareID}/{Amount}', [HCSController::class, 'SubscribeToken']);
+    Route::get('GetToken/{Token}', [HCSController::class, 'GetToken']);
+    Route::get('GetAllToken', [HCSController::class, 'GetAllToken']);
+    
 
 
 

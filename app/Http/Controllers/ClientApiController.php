@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\ClientApi;
 use App\Models\Customers;
 use App\Http\Controllers\AuditTrialController;
+use App\Models\PackagePrice;
+
 
 class ClientApiController extends Controller
 {
@@ -19,14 +21,21 @@ class ClientApiController extends Controller
 
     function CreateClientApiServerURL(Request $req){
 
-        $s = Customers::where('UserId', $req->CustomerId)->first();
+        $s = Customers::where('UserId', $req->Email)->first();
         if ($s==null) {
             return response()->json(['message' => 'Customer not found'], 400);
         }
 
+        $p = PackagePrice::where('ProductId', $req->ProductId)->first();
+        if ($s==null) {
+            return response()->json(['message' => 'Product not found'], 400);
+        }
+
+
 
         $c = new ClientApi();
 
+            $c->apiHost = $req->apiHost;
 
             $c->CompanyId = $s->UserId;
 
@@ -36,23 +45,22 @@ class ClientApiController extends Controller
 
             $c->CompanyPhone = $s->Phone;
 
+            $c->productId = $p->ProductId;
 
-        if($req->filled("ApiServerURL")){
-            $c->ApiServerURL = $req->ApiServerURL;
-        }
+            $c->productName = $p->productName;
+            $c->packageType = $p->packageType;
 
-        if($req->filled("ApiMediaURL")){
-            $c->ApiMediaURL = $req->ApiMediaURL;
-        }
-
+            $c->apiKey = $this->audit->TokenGenerator();
+            $c->apiSecret = $this->audit->TokenGenerator();
+            $c->softwareID = $this->audit->IdGeneratorLong();
 
 
         $saver= $c->save();
         if($saver){
-            return response()->json(["message"=>"Api Created Successfully"], 200);
+            return response()->json(["message"=>"Setup Completed"], 200);
         }
         else{
-            return response()->json(["message"=>"Api Creation Failed"], 400);
+            return response()->json(["message"=>"Setup Failed"], 400);
         }
 
     }
@@ -85,20 +93,20 @@ class ClientApiController extends Controller
 
 
     function ViewClientApiServerURL(Request $req){
-        $c = ClientApi::where("id", $req->Id) ->where("CompanyId",$req->CompanyId) ->first();
+        $c = ClientApi::where("CompanyId",$req->CompanyId) ->first();
 
         if($c==null){
-            return response()->json(["message"=>"ApiServerURL for this company not found"],400);
+            return response()->json(["message"=>"Company not found"],400);
         }
 
        return $c;
     }
 
     function DeleteClientApiServerURL(Request $req){
-        $c = ClientApi::where("id", $req->Id) ->where("CompanyId",$req->CompanyId) ->first();
+        $c = ClientApi::where("CompanyId",$req->CompanyId) ->first();
 
         if($c==null){
-            return response()->json(["message"=>"ApiServerURL for this company not found"],400);
+            return response()->json(["message"=>"Company not found"],400);
         }
 
         $saver= $c->delete();

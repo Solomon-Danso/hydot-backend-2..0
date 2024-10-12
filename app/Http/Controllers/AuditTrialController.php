@@ -229,7 +229,7 @@ function PAuditor($UserId, $Action) {
 
     function TokenGenerator(): string {
         $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$^&*()_+{}|<>-=[],.';
-        $length = 30;
+        $length = 32;
         $randomString = '';
 
         for ($i = 0; $i < $length; $i++) {
@@ -275,7 +275,7 @@ function PAuditor($UserId, $Action) {
         $randomID = $dateTime->format('YmdHis');
         return $randomID;
     }
-    
+
     function RandomIdGenerator(): string {
     $randomID = str_pad(mt_rand(0, 999999), 6, '0', STR_PAD_LEFT);
     return $randomID;
