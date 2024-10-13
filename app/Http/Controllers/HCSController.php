@@ -183,7 +183,7 @@ class HCSController extends Controller
                     // Return the response from the API in the specified format
                     return response()->json($response->json(), $response->status());
                 } catch (\Exception $e) {
-                   
+
                     return response()->json(["Status" => "Failed", "Message" => "Failed to connect to external server: " . $e->getMessage()], 400);
                 }
             } else {
@@ -255,41 +255,60 @@ class HCSController extends Controller
 
 
 //User will trigger this method from Spring Boot external application
-public function HCSSchedulePayment($softwareID, $Amount){
-
+public function HCSSchedulePayment($softwareID, $Amount)
+{
     $c = ClientApi::where("softwareID", $softwareID)->first();
 
     if ($c == null) {
         return response()->json(["message" => "Company not found"], 400);
     }
 
+    $p = PackagePrice::where("ProductId", $c->productId)
+        ->where("PackageType", $c->packageType)
+        ->first();
 
+    if ($p == null) {
+        return response()->json(["message" => "Package not found"], 400);
+    }
+
+    // Calculate the number of days based on the amount and the variable cost
+    $newDays = intdiv($Amount, $p->VariableCost); // Get the integer division of the amount
+    $remainder = $Amount % $p->VariableCost; // Calculate the remaining amount
+
+    // Check if the user can subscribe for more days if they top up
+    if ($remainder > 0) {
+        $topUpAmount = $p->VariableCost - $remainder;
+        $acceptAmount = $Amount - $remainder;
+
+        $message = "The daily cost for the {$c->packageType} package is {$p->VariableCost} cedis.
+        Based on your payment of {$Amount} cedis, you will be subscribed for {$newDays} days.
+        To extend your subscription to an additional day, you may top up with {$topUpAmount} cedis, or you can maintain your a payment of {$acceptAmount} cedis to subscribe for {$newDays} days.";
+        return response()->json(["message" => $message], 400);
+    }
 
     $s = new Sales();
-
     $s->CustomerName = $c->CompanyEmail;
     $s->CustomerId = $softwareID;
-    $s->PaymentReference = "Software Subscription for ".$c->productName;
+    $s->PaymentReference = "Software Subscription for " . $c->productName;
     $s->Amount = $Amount;
-    $s->TransactionId = $this-> IdGenerator();
+    $s->TransactionId = $this->IdGenerator();
     $s->IsApproved = false;
 
     $saver = $s->save();
-    if($saver){
-
+    if ($saver) {
         Mail::to($c->CompanyEmail)->send(new HcsPay($s));
 
-        $message = "Scheduled payment for ".$s->CustomerName;
-        $this->audit->Auditor($req->AdminId, $message);
+        $auditMessage = "Scheduled payment for " . $s->CustomerName;
+        $this->audit->Auditor($req->AdminId, $auditMessage);
 
+        $message = "The daily cost for the {$c->packageType} package is {$p->VariableCost} cedis.
+        Based on your payment of {$Amount} cedis, you will be subscribed for {$newDays} days.
+        Please check your email ({$c->CompanyEmail}) to approve this transaction.";
 
-        return response()->json(["message" => $message], 200);
-
-    }else{
+        return response()->json(["message" => "Kindly check your email ".$c->CompanyEmail." to approve this transaction"], 200);
+    } else {
         return response()->json(["message" => "Failed to schedule payment"], 400);
     }
-
-
 }
 
 
