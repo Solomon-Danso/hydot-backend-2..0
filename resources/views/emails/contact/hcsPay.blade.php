@@ -260,7 +260,7 @@
                                                                                                             <div style="padding-bottom: 40px">
                                                                                                                 <p style="margin: 0 auto;max-width: 300px;font-size: 12px;line-height: 18px;text-align: center;color: #0D3E65">
                                                                                                                     <span style="font-size: 18px; line-height: 20px;">Hydot Tech</span>
-                                                                                                                    <span style="font-size: 18px; line-height: 20px;">Token
+                                                                                                                    <span style="font-size: 18px; line-height: 20px;">Software Subscription
                                                                                                                        </span>
                                                                                                                 </p>
                                                                                                                 <p style="margin: 0;font-size: 14px;line-height: 17px;text-align: center;padding-top: 10px;color: #0D3E65">
@@ -301,26 +301,14 @@
                                                                                         </table>
                                                                                         <table style="border-spacing: 0;border-collapse: collapse;vertical-align: top" cellpadding="0" cellspacing="0" width="100%">
                                                                                             <tbody>
-                                                                                                <tr style="vertical-align: top">
-                                                                                                    <td style="word-break: break-word;border-collapse: collapse !important;vertical-align: top;padding-top: 0;padding-right: 20px;padding-bottom: 0;padding-left: 20px;">
-                                                                                                        <div style="color:#555555;line-height:120%;font-family:-apple-system, BlinkMacSystemFont, &#039;Segoe UI&#039;, &#039;Roboto&#039;, &#039;Oxygen&#039;, &#039;Ubuntu&#039;, &#039;Cantarell&#039;, &#039;Fira Sans&#039;, &#039;Droid Sans&#039;, &#039;Helvetica Neue&#039;, sans-serif;">
-                                                                                                            <div style="font-size:14px;line-height:17px;text-align:left;color:#555555;font-family:-apple-system, BlinkMacSystemFont, &#039;Segoe UI&#039;, &#039;Roboto&#039;, &#039;Oxygen&#039;, &#039;Ubuntu&#039;, &#039;Cantarell&#039;, &#039;Fira Sans&#039;, &#039;Droid Sans&#039;, &#039;Helvetica Neue&#039;, sans-serif;padding-top: 15px;padding-right: 10px;padding-bottom: 15px;padding-left: 10px;border-bottom: solid 1px #EDEDED;">
-                                                                                                                <p style="margin: 0;font-size: 14px;line-height: 17px;text-align: left">
-                                                                                                                    Subscription Token&nbsp;
-                                                                                                                    <strong style="float:right">{{ $Sales->Token }}</strong>
-                                                                                                                    <br>
-                                                                                                                </p>
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                    </td>
-                                                                                                </tr>
+
                                                                                                 <tr style="vertical-align: top">
                                                                                                     <td style="word-break: break-word;border-collapse: collapse !important;vertical-align: top;padding-top: 0;padding-right: 20px;padding-bottom: 0;padding-left: 20px;">
                                                                                                         <div style="color:#555555;line-height:120%;font-family:-apple-system, BlinkMacSystemFont, &#039;Segoe UI&#039;, &#039;Roboto&#039;, &#039;Oxygen&#039;, &#039;Ubuntu&#039;, &#039;Cantarell&#039;, &#039;Fira Sans&#039;, &#039;Droid Sans&#039;, &#039;Helvetica Neue&#039;, sans-serif;">
                                                                                                             <div style="font-size:14px;line-height:17px;text-align:left;color:#555555;font-family:-apple-system, BlinkMacSystemFont, &#039;Segoe UI&#039;, &#039;Roboto&#039;, &#039;Oxygen&#039;, &#039;Ubuntu&#039;, &#039;Cantarell&#039;, &#039;Fira Sans&#039;, &#039;Droid Sans&#039;, &#039;Helvetica Neue&#039;, sans-serif;border-bottom: solid 1px #EDEDED;padding-top: 15px;padding-right: 10px;padding-bottom: 15px;padding-left: 10px;">
                                                                                                                 <p style="margin: 0;font-size: 14px;line-height: 17px;text-align: left">
                                                                                                                     Product Name&nbsp;
-                                                                                                                    <strong style="float:right">{{ $Sales->ProductName }}</strong>
+                                                                                                                    <strong style="float:right">{{ $packageName }}</strong>
                                                                                                                     <br>
                                                                                                                 </p>
                                                                                                             </div>
@@ -333,7 +321,7 @@
                                                                                                             <div style="font-size:14px;line-height:17px;text-align:left;color:#555555;font-family:-apple-system, BlinkMacSystemFont, &#039;Segoe UI&#039;, &#039;Roboto&#039;, &#039;Oxygen&#039;, &#039;Ubuntu&#039;, &#039;Cantarell&#039;, &#039;Fira Sans&#039;, &#039;Droid Sans&#039;, &#039;Helvetica Neue&#039;, sans-serif;padding-top: 15px;padding-right: 10px;padding-bottom: 15px;padding-left: 10px;">
                                                                                                                 <p style="margin: 0;font-size: 14px;line-height: 17px;text-align: left">
                                                                                                                     Package Type&nbsp;
-                                                                                                                    <strong style="float:right">{{ $Sales->PackageType }}</strong>
+                                                                                                                    <strong style="float:right">{{ $packageType }}</strong>
                                                                                                                     <br>
                                                                                                                 </p>
                                                                                                             </div>
@@ -346,8 +334,8 @@
                                                                                                         <div style="color:#555555;line-height:120%;font-family:-apple-system, BlinkMacSystemFont, &#039;Segoe UI&#039;, &#039;Roboto&#039;, &#039;Oxygen&#039;, &#039;Ubuntu&#039;, &#039;Cantarell&#039;, &#039;Fira Sans&#039;, &#039;Droid Sans&#039;, &#039;Helvetica Neue&#039;, sans-serif;">
                                                                                                             <div style="font-size:14px;line-height:17px;text-align:left;color:#555555;font-family:-apple-system, BlinkMacSystemFont, &#039;Segoe UI&#039;, &#039;Roboto&#039;, &#039;Oxygen&#039;, &#039;Ubuntu&#039;, &#039;Cantarell&#039;, &#039;Fira Sans&#039;, &#039;Droid Sans&#039;, &#039;Helvetica Neue&#039;, sans-serif;padding-top: 15px;padding-right: 10px;padding-bottom: 15px;padding-left: 10px;">
                                                                                                                 <p style="margin: 0;font-size: 14px;line-height: 17px;text-align: left">
-                                                                                                                    Expiry Date&nbsp;
-                                                                                                                    <strong style="float:right">{{ $Sales->ExpireDate }}</strong>
+                                                                                                                    Subscription Days&nbsp;
+                                                                                                                    <strong style="float:right">{{ $subDays }}</strong>
                                                                                                                     <br>
                                                                                                                 </p>
                                                                                                             </div>
@@ -383,7 +371,7 @@
                                                                                                         <div style="color:#555555;line-height:150%;font-family:-apple-system, BlinkMacSystemFont, &#039;Segoe UI&#039;, &#039;Roboto&#039;, &#039;Oxygen&#039;, &#039;Ubuntu&#039;, &#039;Cantarell&#039;, &#039;Fira Sans&#039;, &#039;Droid Sans&#039;, &#039;Helvetica Neue&#039;, sans-serif;">
                                                                                                             <div style="font-size:14px;line-height:21px;text-align:center;color:#555555;font-family:-apple-system, BlinkMacSystemFont, &#039;Segoe UI&#039;, &#039;Roboto&#039;, &#039;Oxygen&#039;, &#039;Ubuntu&#039;, &#039;Cantarell&#039;, &#039;Fira Sans&#039;, &#039;Droid Sans&#039;, &#039;Helvetica Neue&#039;, sans-serif;">
                                                                                                                 <p style="margin: 0;font-size: 14px;line-height: 21px;text-align: center">
-                                                                                                                    <span style="font-size: 16px; line-height: 24px;" mce-data-marked="1">Hydot Tech Token</span>
+                                                                                                                    <span style="font-size: 16px; line-height: 24px;" mce-data-marked="1">Hydot Tech Subscription</span>
                                                                                                                 </p>
                                                                                                             </div>
                                                                                                             <div style="font-size:14px;line-height:21px;text-align:center;color:#555555;font-family:-apple-system, BlinkMacSystemFont, &#039;Segoe UI&#039;, &#039;Roboto&#039;, &#039;Oxygen&#039;, &#039;Ubuntu&#039;, &#039;Cantarell&#039;, &#039;Fira Sans&#039;, &#039;Droid Sans&#039;, &#039;Helvetica Neue&#039;, sans-serif;">

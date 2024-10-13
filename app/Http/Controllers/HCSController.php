@@ -263,6 +263,8 @@ public function HCSSchedulePayment($softwareID, $Amount)
         return response()->json(["message" => "Company not found"], 400);
     }
 
+
+
     $p = PackagePrice::where("ProductId", $c->productId)
         ->where("PackageType", $c->packageType)
         ->first();
@@ -280,10 +282,8 @@ public function HCSSchedulePayment($softwareID, $Amount)
         $topUpAmount = $p->VariableCost - $remainder;
         $acceptAmount = $Amount - $remainder;
 
-        $message = "The daily cost for the {$c->packageType} package is {$p->VariableCost} cedis.
-        Based on your payment of {$Amount} cedis, you will be subscribed for {$newDays} days.
-        To extend your subscription to an additional day, you may top up with {$topUpAmount} cedis, or you can maintain your a payment of {$acceptAmount} cedis to subscribe for {$newDays} days.";
-        return response()->json(["message" => $message], 400);
+        $message = "The daily cost for the {$c->packageType} package is {$p->VariableCost} cedis.Based on your payment of {$Amount} cedis, you will be subscribed for {$newDays} days.To extend your subscription to an additional day, you may top up with {$topUpAmount} cedis, or you can maintain your a payment of {$acceptAmount} cedis to subscribe for {$newDays} days.";
+        return response($message, 400);
     }
 
     $s = new Sales();
@@ -291,23 +291,21 @@ public function HCSSchedulePayment($softwareID, $Amount)
     $s->CustomerId = $softwareID;
     $s->PaymentReference = "Software Subscription for " . $c->productName;
     $s->Amount = $Amount;
-    $s->TransactionId = $this->IdGenerator();
+    $s->TransactionId = $this->audit->IdGenerator();
     $s->IsApproved = false;
 
     $saver = $s->save();
     if ($saver) {
-        Mail::to($c->CompanyEmail)->send(new HcsPay($s));
 
-        $auditMessage = "Scheduled payment for " . $s->CustomerName;
-        $this->audit->Auditor($req->AdminId, $auditMessage);
 
-        $message = "The daily cost for the {$c->packageType} package is {$p->VariableCost} cedis.
-        Based on your payment of {$Amount} cedis, you will be subscribed for {$newDays} days.
-        Please check your email ({$c->CompanyEmail}) to approve this transaction.";
+        Mail::to($c->CompanyEmail)->send(new HcsPay($s, $p->ProductName, $p->PackageType, $newDays));
 
-        return response()->json(["message" => "Kindly check your email ".$c->CompanyEmail." to approve this transaction"], 200);
+        $message = "The daily cost for the {$c->packageType} package is {$p->VariableCost} cedis. Based on your payment of {$Amount} cedis, you will be subscribed for {$newDays} days. Please check your email ({$c->CompanyEmail}) to approve this transaction.";
+
+         return response($message, 200);
+
     } else {
-        return response()->json(["message" => "Failed to schedule payment"], 400);
+        return response("Failed to schedule payment", 200);;
     }
 }
 
