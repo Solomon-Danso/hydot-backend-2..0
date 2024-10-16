@@ -89,7 +89,9 @@ Route::middleware([ApiAuthenticator::class])->group(function () {
 
 
     Route::post('ConfigurePackage', [HCSController::class, 'ConfigurePackage']);
-      Route::post('DeleteConfigurePackage', [HCSController::class, 'DeleteConfigurePackage']);
+    Route::post('UpdateConfigurePackage', [HCSController::class, 'UpdateConfigurePackage']);
+
+    Route::post('DeleteConfigurePackage', [HCSController::class, 'DeleteConfigurePackage']);
     Route::post('ViewConfigurePackage', [HCSController::class, 'ViewConfigurePackage']);
     Route::post('ViewAllConfigurePackage', [HCSController::class, 'ViewAllConfigurePackage']);
        Route::get('GetToken/{Token}', [HCSController::class, 'GetToken']);

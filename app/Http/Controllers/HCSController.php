@@ -63,6 +63,39 @@ class HCSController extends Controller
 
     }
 
+    public function UpdateConfigurePackage(Request $req){
+
+        $s = PackagePrice::where("ProductId",$req->ProductId)->first();
+        if($s == null){
+            return response()->json(["message" => "Invalid Package Type"], 400);
+        }
+
+        if($req->VariableCost<1){
+            return response()->json(["message" => "Price cannot be less than 1"], 400);
+        }
+
+        $s->VariableCost = $req->VariableCost;
+
+        $saver = $s->save();
+
+        if($saver){
+
+            $resMessage ="Package Updated for  ".$s->ProductName." successfully";
+            $adminMessage = "Package Updated for  ".$s->ProductName;
+            $this->audit->Auditor($req->AdminId, $adminMessage);
+
+            return response()->json(["message" => $resMessage], 200);
+
+
+        }else{
+            return response()->json(["message" => "Failed to update package price"], 400);
+        }
+
+
+
+    }
+
+
 
 
     public function DeleteConfigurePackage(Request $req){
