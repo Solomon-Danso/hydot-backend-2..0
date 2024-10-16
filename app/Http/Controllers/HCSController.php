@@ -350,10 +350,18 @@ public function HCSSchedulePayment($softwareID, $Amount)
 //System will trigger HCSMakePayment from the email click
 public function HCSMakePayment($TransactionId,$softwareID, $Amount)
 {
+
+    $c = ClientApi::where("softwareID", $softwareID)->first();
+    if($c==null){
+        return response()->json(["message","Company not found"],400);
+    }
+
+
     $sales = Sales::where("TransactionId", $TransactionId)->first();
     if (!$sales) {
         return response()->json(["message" => "Transaction not found"], 400);
     }
+
 
     // Ensure the total amount is an integer and in the smallest currency unit (e.g., kobo, pesewas)
     $totalInPesewas = intval($sales->Amount * 100);
@@ -370,15 +378,11 @@ public function HCSMakePayment($TransactionId,$softwareID, $Amount)
             'Amount' => $sales->Amount,
             'SuccessApi' => 'https://mainapi.hydottech.com/api/SubscribeToken/' . $softwareID.'/'.$Amount,
             //'SuccessApi' => 'https://hydottech.com',
-            'CallbackURL' => 'https://hydottech.com',
+            'CallbackURL' => $c->apiHost,
         ]);
 
         if ($response->successful()) {
             // Function to validate an email address
-            $c = ClientApi::where("softwareID", $softwareID)->first();
-            if($c==null){
-                return response()->json(["message","Company not found"],400);
-            }
 
 
             $paystackData = [
