@@ -7,6 +7,7 @@ use App\Models\ClientApi;
 use App\Models\Customers;
 use App\Http\Controllers\AuditTrialController;
 use App\Models\PackagePrice;
+use App\Models\PrePaidMeter;
 
 
 class ClientApiController extends Controller
@@ -123,8 +124,31 @@ class ClientApiController extends Controller
         }
     }
 
-    function ViewAllClientApiServerURL(){
-       return ClientApi::all();
-    }
+    function ViewAllClientApiServerURL()
+{
+    // Retrieve all data from ClientApi and PrePaidMeter
+    $clients = ClientApi::get();
+    $prepaid = PrePaidMeter::get();
+
+    // Combine the clients with their matching prepaid data based on ProductId
+    $combined = $clients->map(function ($client) use ($prepaid) {
+        // Find the matching PrePaidMeter record with the same ProductId
+        $matchingPrepaid = $prepaid->firstWhere('softwareID', $client->softwareID);
+
+        // Add the ExpireDate to the client if a match is found
+        if ($matchingPrepaid) {
+            $client->ExpireDate = $matchingPrepaid->ExpireDate; // Update to use ExpireDate
+        }
+
+        return $client;
+    });
+
+    return $combined;
+}
+
+
+
+
+
 
 }
