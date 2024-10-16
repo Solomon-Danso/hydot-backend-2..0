@@ -412,7 +412,7 @@ class OnBoardingController extends Controller
                 $s->MessageId = $meetingId;
 
                 $s->Email = $partner->Email;
-                $s->Target = "Partners";
+                $s->Target = "Customers";
                 if($req->filled("Message")){
                     $s->Message = $req->Message;
                 }
