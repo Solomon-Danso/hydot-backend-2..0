@@ -128,7 +128,7 @@ class HCSController extends Controller
         $c = ClientApi::where("softwareID", $softwareID)->first();
 
         if ($c == null) {
-            return response()->json(["Status" => "Failed", "Message" => "Company not found"], 400);
+            return response()->json(["status" => "Failed", "message" => "Company not found"], 400);
         }
 
         // Find the package price for the specified ProductId and PackageType
@@ -137,7 +137,7 @@ class HCSController extends Controller
                          ->first();
 
         if ($p == null) {
-            return response()->json(["Status" => "Failed", "Message" => "Package not found"], 400);
+            return response()->json(["status" => "Failed", "message" => "Package not found"], 400);
         }
 
         // Check if a PrePaidMeter entry already exists with the given softwareID, ProductId, PackageType, and companyId
@@ -283,7 +283,7 @@ public function HCSSchedulePayment($softwareID, $Amount)
         $acceptAmount = $Amount - $remainder;
 
         $message = "The daily cost for the {$c->packageType} package is {$p->VariableCost} cedis.Based on your payment of {$Amount} cedis, you will be subscribed for {$newDays} days.To extend your subscription to an additional day, you may top up with {$topUpAmount} cedis, or you can maintain your a payment of {$acceptAmount} cedis to subscribe for {$newDays} days.";
-        return response($message, 400);
+        return response()->json(["message" => $message], 400);
     }
 
     $s = new Sales();
@@ -302,10 +302,10 @@ public function HCSSchedulePayment($softwareID, $Amount)
 
         $message = "The daily cost for the {$c->packageType} package is {$p->VariableCost} cedis. Based on your payment of {$Amount} cedis, you will be subscribed for {$newDays} days. Please check your email ({$c->CompanyEmail}) to approve this transaction.";
 
-         return response($message, 200);
+        return response()->json(["message" => $message], 200);
 
     } else {
-        return response("Failed to schedule payment", 200);;
+        return response()->json(["message" => "Failed to schedule payment"], 400);
     }
 }
 
