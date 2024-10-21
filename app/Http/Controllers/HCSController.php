@@ -264,6 +264,10 @@ public function HCSSchedulePayment($softwareID, $Amount)
     }
 
 
+    if($Amount<1){
+        return response()->json(["message" => "Amount cannot be less than 1"], 400);
+    }
+
 
     $p = PackagePrice::where("ProductId", $c->productId)
         ->where("PackageType", $c->packageType)
