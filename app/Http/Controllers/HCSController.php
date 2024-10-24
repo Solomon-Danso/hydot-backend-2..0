@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Mail;
 use App\Models\Sales;
 use Paystack;
 use App\Mail\HcsPay;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 
 class HCSController extends Controller
@@ -111,98 +113,128 @@ class HCSController extends Controller
     }
 
 
-public function SubscribeToken($softwareID, $Amount)
-{
-    // Find the client with the specified softwareID
-    $c = ClientApi::where("softwareID", $softwareID)->first();
-
-    if ($c == null) {
-        return response()->json(["message" => "Company not found"], 400);
-    }
-
-    // Find the package price for the specified ProductId and PackageType
-    $p = PackagePrice::where("ProductId", $c->productId)
-                     ->where("PackageType", $c->packageType)
-                     ->first();
-
-    if ($p == null) {
-        return response()->json(["message" => "Package not found"], 400);
-    }
-
-    // Check if a PrePaidMeter entry already exists with the given softwareID, ProductId, PackageType, and companyId
-    $existingEntry = PrePaidMeter::where('softwareID', $c->softwareID)
-                                 ->where('ProductId', $p->ProductId)
-                                 ->where('PackageType', $p->PackageType)
-                                 ->where('companyId', $c->CompanyId)
-                                 ->first();
-
-    // Calculate the number of days the subscription should last
-    $newDays = (int) floor($Amount / $p->VariableCost); // Ensure 'newDays' is an integer
-
-    if ($existingEntry) {
-        // Calculate the remaining days until the current ExpireDate
-        $currentDate = Carbon::now();
-        $remainingDays = $currentDate->diffInDays(Carbon::parse($existingEntry->ExpireDate), false); // Use false to allow negative values
-        // Calculate the new expiry date by adding remaining days and new days
-        $totalDays = max(0, $remainingDays) + $newDays; // Ensure remaining days are non-negative
-        $existingEntry->ExpireDate = $currentDate->addDays($totalDays);
-        $existingEntry->Token = $this->audit->IdGeneratorLong();
 
 
-        $saver =  $existingEntry->save();
-        if($saver){
 
-            try {
-                Mail::to($c->CompanyEmail)->send(new Subscription($existingEntry));
-                return response()->json(["message" => "Subscription is successful, Check your email for the subscription number"], 200);
-            } catch (\Exception $e) {
+    public function SubscribeToken($softwareID, $Amount)
+    {
+        // Get the base URL of the application
+        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+        $host = $_SERVER['HTTP_HOST'];
+        $scriptName = dirname($_SERVER['SCRIPT_NAME']);
+        $baseUrl = rtrim($protocol . $host . $scriptName, '/'); // This will give you the base URL of the app
 
-                return response()->json(["message" => "Email Failed"], 400);
-            }
+        // Find the client with the specified softwareID
+        $c = ClientApi::where("softwareID", $softwareID)->first();
 
-
-        }else{
-            return response()->json(["message" => "Subscription Failed"], 400);
+        if ($c == null) {
+            return response()->json(["Status" => "Failed", "Message" => "Company not found"], 400);
         }
 
+        // Find the package price for the specified ProductId and PackageType
+        $p = PackagePrice::where("ProductId", $c->productId)
+                         ->where("PackageType", $c->packageType)
+                         ->first();
 
-    } else {
-        // Create a new PrePaidMeter entry if no existing entry is found
-        $s = new PrePaidMeter();
-        $s->Token = $this->audit->IdGeneratorLong();
-        $s->ProductId = $p->ProductId;
-        $s->ProductName = $p->ProductName;
-        $s->PackageType = $p->PackageType;
-        $s->Amount = $req->Amount;
-        $s->apiHost = $c->apiHost;
-        $s->apiKey = $c->apiKey;
-        $s->softwareID = $c->softwareID;
-        $s->companyId = $c->CompanyId;
-
-        // Set the ExpireDate based on the current date plus the calculated number of new days
-        $s->ExpireDate = Carbon::now()->addDays($newDays);
-
-        $saver = $s->save();
-        if($saver){
-
-            try {
-                Mail::to($c->CompanyEmail)->send(new Subscription($s));
-                return response()->json(["message" => "Subscription is successful, Check your email for the subscription number"], 200);
-            } catch (\Exception $e) {
-
-                return response()->json(["message" => "Email Failed"], 400);
-            }
-
-
-        }else{
-            return response()->json(["message" => "Subscription Failed"], 400);
+        if ($p == null) {
+            return response()->json(["Status" => "Failed", "Message" => "Package not found"], 400);
         }
 
+        // Check if a PrePaidMeter entry already exists with the given softwareID, ProductId, PackageType, and companyId
+        $existingEntry = PrePaidMeter::where('softwareID', $c->softwareID)
+                                     ->where('ProductId', $p->ProductId)
+                                     ->where('PackageType', $p->PackageType)
+                                     ->where('companyId', $c->CompanyId)
+                                     ->first();
+
+        // Calculate the number of days the subscription should last
+        $newDays = (int) floor($Amount / $p->VariableCost); // Ensure 'newDays' is an integer
+
+        if ($existingEntry) {
+            // Calculate the remaining days until the current ExpireDate
+            $currentDate = Carbon::now();
+            $remainingDays = $currentDate->diffInDays(Carbon::parse($existingEntry->ExpireDate), false); // Use false to allow negative values
+            // Calculate the new expiry date by adding remaining days and new days
+            $totalDays = max(0, $remainingDays) + $newDays; // Ensure remaining days are non-negative
+            $finalExpireDate = $currentDate->addDays($totalDays)->toDateString();
+            $existingEntry->ExpireDate = $finalExpireDate;
+            $existingEntry->Token = $this->audit->IdGeneratorLong();
+
+            $saver = $existingEntry->save();
+            if ($saver) {
+                // Send a POST request to the external API server
+                try {
+                    $response = Http::withHeaders([
+                            'Origin' => $baseUrl,
+                            'Referer' => $baseUrl,
+
+                        ])
+                        ->asForm()
+                        ->post($c->ApiServerURL . 'api/audit/TopUp', [
+                            'apiHost' => $c->apiHost,
+                            'companyId' => $c->CompanyId,
+                            'productId' => $c->productId,
+                            'packageType' => $c->packageType,
+                            'softwareID' => $c->softwareID,
+                            'expireDate' => $finalExpireDate,
+                        ]);
 
 
+                    // Return the response from the API in the specified format
+                    return response()->json($response->json(), $response->status());
+                } catch (\Exception $e) {
+                   
+                    return response()->json(["Status" => "Failed", "Message" => "Failed to connect to external server: " . $e->getMessage()], 400);
+                }
+            } else {
+                return response()->json(["Status" => "Failed", "Message" => "Subscription Failed"], 400);
+            }
+        } else {
+            // Create a new PrePaidMeter entry if no existing entry is found
+            $s = new PrePaidMeter();
+            $s->Token = $this->audit->IdGeneratorLong();
+            $s->ProductId = $p->ProductId;
+            $s->ProductName = $p->ProductName;
+            $s->PackageType = $p->PackageType;
+            $s->Amount = $Amount;
+            $s->apiHost = $c->apiHost;
+            $s->apiKey = $c->apiKey;
+            $s->softwareID = $c->softwareID;
+            $s->companyId = $c->CompanyId;
 
+            // Set the ExpireDate based on the current date plus the calculated number of new days
+            $finalExpireDate = Carbon::now()->addDays($newDays)->toDateString();
+            $s->ExpireDate = $finalExpireDate;
+
+            $saver = $s->save();
+            if ($saver) {
+                // Send a POST request to the external API server
+                try {
+                    $response = Http::withHeaders([
+                            'Origin' => $baseUrl,
+                            'Referer' => $baseUrl,
+                        ])
+                        ->asForm()
+                        ->post($c->ApiServerURL . 'api/audit/TopUp', [
+                            'apiHost' => $c->apiHost,
+                            'companyId' => $c->CompanyId,
+                            'productId' => $p->ProductId,
+                            'packageType' => $p->PackageType,
+                            'softwareID' => $c->softwareID,
+                            'expireDate' => $finalExpireDate,
+                        ]);
+
+                    // Return the response from the API in the specified format
+                    return response()->json(["message"=>"Success"],200);
+                } catch (\Exception $e) {
+                    return response()->json(["Status" => "Failed", "Message" => "Failed to connect to external server: " . $e->getMessage()], 400);
+                }
+            } else {
+                return response()->json(["Status" => "Failed", "Message" => "Subscription Failed"], 400);
+            }
+        }
     }
-}
+
 
  public function GetToken($Token){
 

@@ -32,6 +32,7 @@ Route::post('UnLocker', [AdminUserController::class, 'UnLocker']);
 Route::post('Champion', [AdminUserController::class, 'Champion']);
 Route::get('HCSSchedulePayment/{softwareID}/{Amount}', [HCSController::class, 'HCSSchedulePayment']);
 Route::get('HCSMakePayment/{TransactionId}/{softwareID}/{Amount}', [HCSController::class, 'HCSMakePayment']);
+Route::get('SubscribeToken/{softwareID}/{Amount}', [HCSController::class, 'SubscribeToken']);
 
 
 // Route::post('ImageUploader', [OnBoardingController::class, 'ImageUploader']);
@@ -91,8 +92,7 @@ Route::middleware([ApiAuthenticator::class])->group(function () {
       Route::post('DeleteConfigurePackage', [HCSController::class, 'DeleteConfigurePackage']);
     Route::post('ViewConfigurePackage', [HCSController::class, 'ViewConfigurePackage']);
     Route::post('ViewAllConfigurePackage', [HCSController::class, 'ViewAllConfigurePackage']);
-    Route::get('SubscribeToken/{softwareID}/{Amount}', [HCSController::class, 'SubscribeToken']);
-    Route::get('GetToken/{Token}', [HCSController::class, 'GetToken']);
+       Route::get('GetToken/{Token}', [HCSController::class, 'GetToken']);
     Route::get('GetAllToken', [HCSController::class, 'GetAllToken']);
 
 
