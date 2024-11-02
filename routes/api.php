@@ -19,6 +19,14 @@ use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\OnBoardingController;
 use App\Http\Controllers\ResourcesController;
 use App\Http\Controllers\HCSController;
+use App\Http\Controllers\FinancePlus;
+
+
+
+
+
+
+
 
 // Route for setting up the admin, accessible without authentication
 Route::post('SetUpCreateAdmin', [AdminUserController::class, 'SetUpCreateAdmin']);
@@ -84,6 +92,17 @@ Route::post('PartnerUnLocker', [PartnerAuthentication::class, 'PartnerUnLocker']
 
 // Routes that require authentication
 Route::middleware([ApiAuthenticator::class])->group(function () {
+
+//Finance Plus Section
+
+    Route::post('BudgetConfiguration', [FinancePlus::class, 'BudgetConfiguration']);
+    Route::post('ViewBudgets', [FinancePlus::class, 'ViewBudgets']);
+    Route::post('DeleteBudgets', [FinancePlus::class, 'DeleteBudgets']);
+    Route::post('CreateTransactionMonitor', [FinancePlus::class, 'CreateTransactionMonitor']);
+    Route::post('ViewTransactionMonitor', [FinancePlus::class, 'ViewTransactionMonitor']);
+    Route::post('generateComprehensiveFinancialReport', [FinancePlus::class, 'generateComprehensiveFinancialReport']);
+
+
 
 
 
